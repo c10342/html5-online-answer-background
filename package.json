@@ -1,0 +1,27 @@
+{
+  "name": "html5-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon --inspect ./index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "connect-history-api-fallback": "^1.6.0",
+    "connect-redis": "^3.4.1",
+    "cross-env": "^5.2.0",
+    "express": "^4.16.4",
+    "express-fileupload": "^1.1.4",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.4.1",
+    "nodemailer": "^5.1.1",
+    "redis": "^2.8.0",
+    "xlsx": "^0.14.2"
+  }
+}
