@@ -60,7 +60,6 @@ exports.sendCode = async (req, res) => {
     try {
         const { email } = req.query
         let code = util.getCode()
-        req.session.code = code
         let transporter = nodemailer.createTransport({
             service: '163',
             auth: conf.auth
@@ -82,6 +81,7 @@ exports.sendCode = async (req, res) => {
                 })
                 return
             }
+            req.session.code = code
             res.json({
                 statusCode: conf.successCode,
                 message: '发送成功',
