@@ -284,7 +284,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async submitQuestion({ userName, userId, answer, questionId, title }) {
+    async submitQuestion({ userName, userId, answer, questionId, title,answerTime }) {
         let respone = null
         try {
             const myAnswer = new this.Answers({
@@ -292,7 +292,8 @@ class QusetionDao extends Base {
                 userId,
                 answer,
                 questionId,
-                title
+                title,
+                answerTime
             })
             const result = await myAnswer.save()
             respone = {

@@ -27,6 +27,10 @@ const answer = new Schema({
         type:Boolean,
         default:false
     },
+    answerTime:{
+        type:String,
+        required:true
+    },
     createTime:{
         type:Date,
         default:Date.now

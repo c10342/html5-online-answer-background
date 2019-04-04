@@ -35,8 +35,8 @@ exports.getQuestion = async (req, res) => {
 // 根据试卷id查询试卷详情
 exports.getQuestionById = async (req, res) => {
     try {
-        let { id} = req.params
-        const result = await questionDao.getQuestionById({id})
+        let { id } = req.params
+        const result = await questionDao.getQuestionById({ id })
         res.json(result)
     } catch (error) {
         res.json({
@@ -77,8 +77,8 @@ exports.getPublishedQuestionById = async (req, res) => {
 // 提交试卷
 exports.submitQuestion = async (req, res) => {
     try {
-        const { userName, userId, answer, questionId, title } = req.body
-        const result = await questionDao.submitQuestion({ userName, userId, answer, questionId, title })
+        const { userName, userId, answer, questionId, title, answerTime } = req.body
+        const result = await questionDao.submitQuestion({ userName, userId, answer, questionId, title, answerTime })
         res.json(result)
     } catch (error) {
         res.json({

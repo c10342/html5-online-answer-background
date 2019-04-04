@@ -112,7 +112,8 @@ class Base {
                     questionId: item.questionId._id,
                     correctCount,
                     totalCount,
-                    correctPercent: correctCount / totalCount
+                    correctPercent: correctCount / totalCount,
+                    answerTime:item.answerTime
                 }
                 data.push(obj)
             })

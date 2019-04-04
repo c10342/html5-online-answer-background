@@ -1,9 +1,11 @@
 const XLSX = require('xlsx');
 const conf = require('../config/index')
+const util = require('../util/index')
 
 class UploadDao {
     constructor() {
         this.conf = conf
+        this.util = util
     }
 
     /**
@@ -67,7 +69,8 @@ class UploadDao {
 
             let single = []
             for (let i = 0; i < arr.length; i += 6) {
-                let id = Date.now().toString();
+                // let id = Date.now().toString();
+                let id = this.util.getRandomStr()
                 let j = i
                 single.push({
                     id,
@@ -103,7 +106,7 @@ class UploadDao {
 
             let multiple = []
             for (let i = 0; i < arr.length; i += 6) {
-                let id = Date.now().toString();
+                let id = this.util.getRandomStr()
                 let j = i
                 multiple.push({
                     id,
@@ -139,7 +142,7 @@ class UploadDao {
 
             let judgement = []
             for (let i = 0; i < arr.length; i += 2) {
-                let id = Date.now().toString();
+                let id = this.util.getRandomStr()
                 let j = i
                 judgement.push({
                     id,
@@ -174,7 +177,7 @@ class UploadDao {
 
             let answer = []
             for (let i = 0; i < arr.length; i += 2) {
-                let id = Date.now().toString();
+                let id = this.util.getRandomStr()
                 let j = i
                 answer.push({
                     id,

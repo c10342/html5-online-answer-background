@@ -22,6 +22,8 @@ const upload = require('./router/upload')
 
 const statistics = require('./router/statistics')
 
+const downLoad = require('./router/downLoad')
+
 const port = process.env.PORT || 5000
 
 const host = process.env.HOST || 'localhost'
@@ -35,10 +37,6 @@ const FileUpload = require('express-fileupload')
 const path = require('path')
 
 const history = require('connect-history-api-fallback')
-
-app.use(history())
-
-app.use('/',express.static(path.join(__dirname,'./dist')))
 
 // 连接数据库
 mongoose.connect(mongodbURI,{ useNewUrlParser: true })
@@ -92,6 +90,12 @@ app.use('/api/questions',questions)
 app.use('/api/comment',comment)
 app.use('/api/upload',upload)
 app.use('/api/statistics',statistics)
+app.use('/api/downLoad',downLoad)
+
+// 配合使用前端history模式
+app.use(history())
+
+app.use('/',express.static(path.join(__dirname,'./dist')))
 
 app.listen(port,host,()=>{
     console.log(`${host}:${port}`)

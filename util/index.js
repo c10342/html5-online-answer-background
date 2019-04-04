@@ -86,3 +86,8 @@ exports.getCode = () => {
     let code = Math.floor(Math.random() * (max - min + 1) + min)
     return code
 }
+
+// 产生随机字符串
+exports.getRandomStr = () => {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 6)
+}
