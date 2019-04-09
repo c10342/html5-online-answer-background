@@ -1,29 +1,21 @@
-/**
- * Welcome to your Workbox-powered service worker!
- *
- * You'll need to register this file in your web app and you should
- * disable HTTP caching for this file too.
- * See https://goo.gl/nhQhGp
- *
- * The rest of the code is auto-generated. Please don't update this file
- * directly; instead, make changes to your Workbox build configuration
- * and re-run your build process.
- * See https://goo.gl/2aRDsh
- */
+importScripts("/precache-manifest.ef0adf586d714ab796af3b2c508dd46c.js", "https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
-importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
-importScripts(
-  "/precache-manifest.4a77b72217b4d99460114a0d1609a2e3.js"
-);
+workbox.core.setCacheNameDetails({prefix: "vue-pwa"});
 
-workbox.core.setCacheNameDetails({prefix: "html5-client"});
-
-/**
- * The workboxSW.precacheAndRoute() method efficiently caches and responds to
- * requests for URLs in the manifest.
- * See https://goo.gl/S9QRab
- */
 self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
+
+// 动态ajax请求缓存
+workbox.routing.registerRoute(function(obj){
+    let pathname = obj.url.pathname
+    if(pathname.startsWith('/api/user/login') || pathname.startsWith('/api/user/register') || pathname.startsWith('/api/user/sendCode')){
+        return false
+    }
+    // true缓存，false不缓存，这样可以选择缓存那些请求
+    return true
+},workbox.strategies.staleWhileRevalidate())
+// workbox.strategies.cacheFirst()缓存优先
+// workbox.strategies.networkFirst()网络优先
+
