@@ -95,20 +95,22 @@ app.use('/api/upload', upload)
 app.use('/api/statistics', statistics)
 app.use('/api/downLoad', downLoad)
 
-app.use('/',function(req,res,next){
-    const agent = req.headers['user-agent']
-    if(agent.includes('Firefox')){
+app.use('/', function (req, res, next) {
+    try {
         let url = req.url
-        if(url.startsWith('/index.html') || url.startsWith('/login')){
-            res.sendFile(path.join(__dirname,'./dist/login/index.html'))
-        }else if(url.startsWith('/register')){
-            res.sendFile(path.join(__dirname,'./dist/register/index.html'))
-        }else{
+        if (url.startsWith('/login')) {
+            res.sendFile(path.join(__dirname, './dist/login/index.html'))
+        } else if (url.startsWith('/register')) {
+            res.sendFile(path.join(__dirname, './dist/register/index.html'))
+        } else {
             next()
         }
-        return
+    } catch (error) {
+        res.json({
+            statusCode: errorCode,
+            message: error.toString()
+        })
     }
-    next()
 })
 
 // 配合使用前端history模式
