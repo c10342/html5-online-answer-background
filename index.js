@@ -98,7 +98,7 @@ app.use('/api/downLoad', downLoad)
 app.use('/', function (req, res, next) {
     try {
         let url = req.url
-        if (url.startsWith('/login') || url=='/') {
+        if (url.startsWith('/login') || url == '/') {
             res.sendFile(path.join(__dirname, './dist/login/index.html'))
         } else if (url.startsWith('/register')) {
             res.sendFile(path.join(__dirname, './dist/register/index.html'))

@@ -32,7 +32,7 @@ self.__precacheManifest = [
     "url": "/fonts/fontawesome-webfont.eot"
   },
   {
-    "revision": "d3b2baf276852026bf02730b6bcb36e5",
+    "revision": "8ed0877f53f77e6997b370aa05c5a252",
     "url": "/index.html"
   },
   {
