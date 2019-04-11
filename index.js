@@ -43,7 +43,7 @@ mongoose.connect(mongodbURI, { useNewUrlParser: true })
         console.log(error)
     })
 
-// 中间件
+// 处理post请求数据
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
@@ -61,6 +61,7 @@ app.use(session({
     name: sessionName
 }));
 
+// 把上传的文件保存在内存中
 app.use(FileUpload());
 
 // 检查是否已经登录
@@ -116,6 +117,7 @@ app.use('/api/downLoad', downLoad)
 // 配合使用前端history模式
 app.use(history())
 
+// 静态资源
 app.use('/', express.static(path.join(__dirname, './dist')))
 
 // 处理错误
