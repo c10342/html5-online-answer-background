@@ -41,7 +41,7 @@ const history = require('connect-history-api-fallback')
 
 // 请求日志插件
 const logger = require('morgan')
-
+// 用于分割日志
 const FileStreamRotator = require('file-stream-rotator')
 
 const fs = require('fs')
@@ -61,7 +61,7 @@ mongoose.connect(mongodbURI, {
 const logDirectory = path.join(__dirname, './log')
 // 判断log目录是否存在，不存在就创建
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
-// create a rotating write stream
+// create a rotating write stream,分割日志
 const accessLogStream = FileStreamRotator.getStream({
     date_format: 'YYYYMMDD',
     filename: path.join(logDirectory, 'access-%DATE%.log'),
