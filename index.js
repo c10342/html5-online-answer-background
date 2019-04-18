@@ -10,7 +10,12 @@ const redis = require('redis')
 
 const app = express()
 
-const { mongodbURI, redisConf, sessionName, errorCode } = require('./config')
+const {
+    mongodbURI,
+    redisConf,
+    sessionName,
+    errorCode
+} = require('./config')
 
 const user = require('./router/user')
 
@@ -34,8 +39,17 @@ const path = require('path')
 
 const history = require('connect-history-api-fallback')
 
+// 请求日志插件
+const logger = require('morgan')
+
+const FileStreamRotator = require('file-stream-rotator')
+
+const fs = require('fs')
+
 // 连接数据库
-mongoose.connect(mongodbURI, { useNewUrlParser: true })
+mongoose.connect(mongodbURI, {
+        useNewUrlParser: true
+    })
     .then(() => {
         console.log('connect success')
     })
@@ -43,8 +57,32 @@ mongoose.connect(mongodbURI, { useNewUrlParser: true })
         console.log(error)
     })
 
+// 请求日志相关
+const logDirectory = path.join(__dirname, './log')
+// 判断log目录是否存在，不存在就创建
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
+// create a rotating write stream
+const accessLogStream = FileStreamRotator.getStream({
+    date_format: 'YYYYMMDD',
+    filename: path.join(logDirectory, 'access-%DATE%.log'),
+    frequency: 'daily',
+    verbose: false
+})
+app.use(logger('dev', {
+    skip: function (req, res) {
+        // 状态码小于400的日志不会打印在控制台，即出现错误才会打印在控制台
+        return res.statusCode < 400
+    },
+}));
+// 把请求日志写入文件
+app.use(logger('common', {
+    stream: accessLogStream
+}))
+
 // 处理post请求数据
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({
+    extended: false
+}))
 app.use(bodyParser.json())
 
 // 使用redis持久化session
@@ -57,7 +95,10 @@ app.use(session({
     }),
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 },
+    cookie: {
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24
+    },
     name: sessionName
 }));
 
