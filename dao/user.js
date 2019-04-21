@@ -57,7 +57,7 @@ class UserDao {
                     response = {
                         statusCode: this.conf.successCode,
                         data: {
-                            userInfo: userRes
+                            userInfo: userRes,
                         },
                         message: '注册成功'
                     }

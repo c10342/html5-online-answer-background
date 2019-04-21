@@ -14,8 +14,13 @@ const {
     mongodbURI,
     redisConf,
     sessionName,
-    errorCode
+    errorCode,
+    whiteList,
+    privateKey,
+    tokenTime
 } = require('./config')
+
+const util = require('./util/index')
 
 const user = require('./router/user')
 
@@ -38,6 +43,8 @@ const FileUpload = require('express-fileupload')
 const path = require('path')
 
 const history = require('connect-history-api-fallback')
+
+const jwt = require('jsonwebtoken')
 
 // 请求日志插件
 const logger = require('morgan')
@@ -109,17 +116,31 @@ app.use(FileUpload());
 app.use('/api', function (req, res, next) {
     try {
         let url = req.url
-        if (url.startsWith('/user/login') || url.startsWith('/user/register') || url.startsWith('/user/sendCode')) {
+        let flag = whiteList.some(item => url.startsWith(item))
+        if (flag) {
             next()
         } else {
-            if (req.session.login) {
-                next()
-            } else {
-                res.json({
-                    statusCode: errorCode,
-                    message: '登录已过期,请检查登录状态'
-                })
-            }
+            let token = req.headers.token
+            // 校验token
+            jwt.verify(token, privateKey, function (err, decoded) {
+                if (err) {
+                    res.json({
+                        statusCode: 401,
+                        message: 'token已经过期或无效'
+                    })
+                    return
+                }
+                if (req.session.login && decoded._id) {
+                    // 刷新token
+                    res.setHeader('token',util.createToken(decoded,privateKey,{ expiresIn: tokenTime }))
+                    next()
+                } else {
+                    res.json({
+                        statusCode: 401,
+                        message: '登录已过期,请重新登录'
+                    })
+                }
+            });
         }
     } catch (error) {
         res.json({

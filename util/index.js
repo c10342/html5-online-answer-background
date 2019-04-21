@@ -2,6 +2,8 @@ const crypto = require('crypto')
 
 const axios = require('axios')
 
+const jwt = require('jsonwebtoken')
+
 // md5加密
 exports.cryptoPwd = (password) => {
     const md5 = crypto.createHash('md5')
@@ -90,4 +92,9 @@ exports.getCode = () => {
 // 产生随机字符串
 exports.getRandomStr = () => {
     return Date.now().toString() + Math.random().toString(36).substr(2, 6)
+}
+
+// 生成token
+exports.createToken = (info,key,opt) => {
+    return jwt.sign({_id:info._id,name:info.name,email:info.email,createTime:info.createTime,password:info.password},key,opt)
 }
