@@ -23,6 +23,7 @@ exports.register = async (req, res) => {
         if (result.statusCode == 200) {
             req.session.login = true
             req.session.code = null
+            res.setHeader('token',util.createToken(result.data.userInfo,conf.privateKey,{ expiresIn: conf.tokenTime }))
         }
 
         res.json(result)
@@ -45,6 +46,7 @@ exports.login = async (req, res) => {
         const result = await userDao.login({ email, password })
         if (result.statusCode == 200) {
             req.session.login = true
+            res.setHeader('token',util.createToken(result.data.userInfo,conf.privateKey,{ expiresIn: conf.tokenTime }))
         }
         res.json(result)
     } catch (error) {

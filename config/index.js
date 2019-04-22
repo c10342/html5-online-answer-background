@@ -16,5 +16,14 @@ module.exports = {
     // 失败返回码
     errorCode: 400,
 
-    sessionName:'session_id'
+    sessionName: 'session_id',
+
+    // jwt加密
+    privateKey: 'jwt-key',
+
+    // 白名单
+    whiteList: ['/user/login', '/user/register', '/user/sendCode','/user/logout'],
+
+    // token过期时间
+    tokenTime: '1h'
 }
