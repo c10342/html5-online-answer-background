@@ -16,8 +16,12 @@ module.exports = {
     },
     // redis配置
     redisConf: {
-        port: '6379',
-        host: '127.0.0.1'
+        get port(){
+            return '6379'
+        },
+        get host(){
+            return '127.0.0.1'
+        }
     },
     // 成功返回码
     get successCode() {
@@ -54,5 +58,7 @@ module.exports = {
     },
 
     // 白名单
-    whiteList: ['/user/login', '/user/register', '/user/sendCode', '/user/logout'],
+    get whiteList(){
+        return ['/user/login', '/user/register', '/user/sendCode', '/user/logout']
+    },
 }
