@@ -1,29 +1,58 @@
 module.exports = {
     // 数据库链接地址
-    mongodbURI: 'mongodb://localhost:27017/anwser',
+    get mongodbURI() {
+        return 'mongodb://localhost:27017/anwser'
+    },
+    // smtp邮箱服务
     auth: {
         // 邮箱
-        user: 'p6699148@163.com',
+        get user() {
+            return 'p6699148@163.com'
+        },
         // 授权码
-        pass: 'lin19960519'
+        get pass() {
+            return 'lin19960519'
+        }
     },
+    // redis配置
     redisConf: {
         port: '6379',
         host: '127.0.0.1'
     },
     // 成功返回码
-    successCode: 200,
+    get successCode() {
+        return 200;
+    },
     // 失败返回码
-    errorCode: 400,
+    get errorCode() {
+        return 400;
+    },
 
-    sessionName: 'session_id',
+    // session配置
+    sessionConf: {
+        // session名称
+        get sessionName() {
+            return 'session_id'
+        },
 
-    // jwt加密
-    privateKey: 'jwt-key',
+        // session过期时间
+        get maxAge() {
+            return 1000 * 60 * 60 * 24
+        },
+    },
+
+    jwtConfig: {
+        // jwt加密
+        get privateKey() {
+            return 'jwt-key';
+        },
+
+        // token过期时间
+        get tokenTime() {
+            return '1h'
+        },
+    },
 
     // 白名单
-    whiteList: ['/user/login', '/user/register', '/user/sendCode','/user/logout'],
-
-    // token过期时间
-    tokenTime: '1h'
+    whiteList: ['/user/login', '/user/register', '/user/sendCode', '/user/logout'],
 }

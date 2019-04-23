@@ -13,11 +13,10 @@ const app = express()
 const {
     mongodbURI,
     redisConf,
-    sessionName,
+    sessionConf,
     errorCode,
     whiteList,
-    privateKey,
-    tokenTime
+    jwtConfig
 } = require('./config')
 
 const util = require('./util/index')
@@ -104,15 +103,15 @@ app.use(session({
     saveUninitialized: true,
     cookie: {
         secure: false,
-        maxAge: 1000 * 60 * 60 * 24
+        maxAge: sessionConf.maxAge
     },
-    name: sessionName
+    name: sessionConf.sessionName
 }));
 
 // 把上传的文件保存在内存中
 app.use(FileUpload());
 
-// 检查是否已经登录
+// 检查是否已经登录,以及校验token
 app.use('/api', function (req, res, next) {
     try {
         let url = req.url
@@ -122,7 +121,7 @@ app.use('/api', function (req, res, next) {
         } else {
             let token = req.headers.token
             // 校验token
-            jwt.verify(token, privateKey, function (err, decoded) {
+            jwt.verify(token, jwtConfig.privateKey, function (err, decoded) {
                 if (err) {
                     res.json({
                         statusCode: 401,
@@ -132,7 +131,7 @@ app.use('/api', function (req, res, next) {
                 }
                 if (req.session.login && decoded._id) {
                     // 刷新token
-                    res.setHeader('token',util.createToken(decoded,privateKey,{ expiresIn: tokenTime }))
+                    res.setHeader('token',util.createToken(decoded,jwtConfig.privateKey,{ expiresIn: jwtConfig.tokenTime }))
                     next()
                 } else {
                     res.json({
@@ -158,31 +157,13 @@ app.use('/api/upload', upload)
 app.use('/api/statistics', statistics)
 app.use('/api/downLoad', downLoad)
 
-// app.use('/', function (req, res, next) {
-//     try {
-//         let url = req.url
-//         if (url.startsWith('/login') || url == '/') {
-//             res.sendFile(path.join(__dirname, './dist/login/index.html'))
-//         } else if (url.startsWith('/register')) {
-//             res.sendFile(path.join(__dirname, './dist/register/index.html'))
-//         } else {
-//             next()
-//         }
-//     } catch (error) {
-//         res.json({
-//             statusCode: errorCode,
-//             message: error.toString()
-//         })
-//     }
-// })
-
 // 配合使用前端history模式
 app.use(history())
 
 // 静态资源
 app.use('/', express.static(path.join(__dirname, './dist')))
 
-// 处理错误
+// 处理全局错误
 app.use(function (err, req, res, next) {
     console.error(err.stack)
     res.json({
@@ -196,5 +177,5 @@ const port = process.env.PORT || 5000
 const host = process.env.HOST || 'localhost'
 
 app.listen(port, host, () => {
-    console.log(`${host}:${port}`)
+    console.log(`服务器地址 : ${host}:${port}`)
 })
