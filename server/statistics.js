@@ -7,9 +7,16 @@ const statisticsDao = new StatisticsDao()
 // 统计用户发布的所有试题
 exports.statisticsQuestions = async (req, res) => {
     try {
-        const { userId,pageSize = 10, currentPage = 1, title, endTime, beginTime } = req.query
-        const result = await statisticsDao.statisticsQuestions({ userId, pageSize, currentPage,title, endTime, beginTime })
-        res.json(result)
+        const { userId, pageSize = 10, currentPage = 1, title, endTime, beginTime } = req.query
+        const { list, total } = await statisticsDao.statisticsQuestions({ userId, pageSize, currentPage, title, endTime, beginTime })
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                list,
+                total
+            },
+            message: '查询成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -22,8 +29,14 @@ exports.statisticsQuestions = async (req, res) => {
 exports.statisticsQuestionsById = async (req, res) => {
     try {
         const { id } = req.params
-        const result = await statisticsDao.statisticsQuestionsById({ id })
-        res.json(result)
+        const { list } = await statisticsDao.statisticsQuestionsById({ id })
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                list
+            },
+            message: '统计成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -37,8 +50,15 @@ exports.getAnswerUserById = async (req, res) => {
     try {
         const { id } = req.params
         const { userName, beginTime, endTime, pageSize = 10, currentPage = 1 } = req.query
-        const result = await statisticsDao.getAnswerUserById({ id, userName, beginTime, endTime, pageSize, currentPage })
-        res.json(result)
+        const { answerList, total } = await statisticsDao.getAnswerUserById({ id, userName, beginTime, endTime, pageSize, currentPage })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                answerList,
+                total,
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,

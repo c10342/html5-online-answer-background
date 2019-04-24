@@ -119,7 +119,7 @@ class Base {
             })
             return data
         } catch (error) {
-            throw new Error(error)
+            throw error.toString()
         }
     }
 }

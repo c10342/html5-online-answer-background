@@ -123,6 +123,7 @@ app.use('/api', function (req, res, next) {
             // 校验token
             jwt.verify(token, jwtConfig.privateKey, function (err, decoded) {
                 if (err) {
+                    console.log(err)
                     res.json({
                         statusCode: 401,
                         message: 'token已经过期或无效'

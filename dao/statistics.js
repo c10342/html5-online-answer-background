@@ -6,14 +6,11 @@ const Answers = require('../models/answer')
 
 const util = require('../util/index')
 
-const conf = require('../config/index')
-
 class StatisticsDao extends Base {
     constructor() {
         super()
         this.Questions = Questions
         this.util = util
-        this.conf = conf
         this.Answers = Answers
     }
 
@@ -25,7 +22,6 @@ class StatisticsDao extends Base {
      * @memberof StatisticsDao
      */
     async statisticsQuestions({ userId, pageSize = 10, currentPage = 1, title, endTime, beginTime }) {
-        let respone = null
         try {
             let params = {
                 userId,
@@ -105,21 +101,10 @@ class StatisticsDao extends Base {
                     percent: count / (totalQuestion * aResult.length),
                 })
             }
-            respone = {
-                statusCode: this.conf.successCode,
-                data: {
-                    list: arr,
-                    total
-                },
-                message: '查询成功'
-            }
+            return {list: arr,total}
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -130,7 +115,6 @@ class StatisticsDao extends Base {
      * @memberof StatisticsDao
      */
     async statisticsQuestionsById({ id }) {
-        let respone = null
         try {
             let qResult = await this.Questions.findById(id)
             if (qResult) {
@@ -305,26 +289,13 @@ class StatisticsDao extends Base {
                     judgement: judgementArr,
                     answer: answerArr
                 }
-                respone = {
-                    statusCode: this.conf.successCode,
-                    data: {
-                        list: obj,
-                    },
-                    message: '统计成功'
-                }
+                return {list: obj}
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '统计失败,无此试题'
-                }
+                throw '统计失败,无此试题'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+           throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -335,7 +306,6 @@ class StatisticsDao extends Base {
      * @memberof StatisticsDao
      */
     async getAnswerUserById({ id, pageSize = 10, currentPage = 1, userName, beginTime, endTime }) {
-        let respone = null
         try {
             let params = {
                 questionId: id,
@@ -356,27 +326,13 @@ class StatisticsDao extends Base {
             const total = await this.Answers.countDocuments(params)
             let data = this.statisticsQuestion({ result })
             if (result) {
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '查询成功',
-                    data: {
-                        answerList: data,
-                        total,
-                    }
-                }
+                return {answerList: data,total}
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '查询失败',
-                }
+                throw '查询失败'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
 }

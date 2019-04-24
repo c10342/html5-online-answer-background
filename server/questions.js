@@ -9,7 +9,10 @@ exports.addQuestion = async (req, res) => {
     try {
         const { title, userName, userId, single, multiple, judgement, answer } = req.body
         const result = await questionDao.addQuestion({ title, userName, userId, single, multiple, judgement, answer })
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            message: '发布成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -22,8 +25,15 @@ exports.addQuestion = async (req, res) => {
 exports.getQuestion = async (req, res) => {
     try {
         let { _id, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime } = req.query
-        const result = await questionDao.getQuestion({ _id, pageSize, currentPage, title, userName, beginTime, endTime })
-        res.json(result)
+        const { questionList, total } = await questionDao.getQuestion({ _id, pageSize, currentPage, title, userName, beginTime, endTime })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                questionList,
+                total
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -36,8 +46,14 @@ exports.getQuestion = async (req, res) => {
 exports.getQuestionById = async (req, res) => {
     try {
         let { id } = req.params
-        const result = await questionDao.getQuestionById({ id })
-        res.json(result)
+        const { questionList } = await questionDao.getQuestionById({ id })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                questionList
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -50,8 +66,15 @@ exports.getQuestionById = async (req, res) => {
 exports.getPublishedQuestion = async (req, res) => {
     try {
         let { userId, pageSize = 10, currentPage = 1, title, beginTime, endTime } = req.query
-        const result = await questionDao.getPublishedQuestion({ userId, pageSize, currentPage, title, beginTime, endTime })
-        res.json(result)
+        const { publishedQuestion, total } = await questionDao.getPublishedQuestion({ userId, pageSize, currentPage, title, beginTime, endTime })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                publishedQuestion,
+                total
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -64,8 +87,14 @@ exports.getPublishedQuestion = async (req, res) => {
 exports.getPublishedQuestionById = async (req, res) => {
     try {
         let { id } = req.params
-        const result = await questionDao.getPublishedQuestionById({ id })
-        res.json(result)
+        const { questionDetail } = await questionDao.getPublishedQuestionById({ id })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                questionDetail
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -79,7 +108,10 @@ exports.submitQuestion = async (req, res) => {
     try {
         const { userName, userId, answer, questionId, title, answerTime } = req.body
         const result = await questionDao.submitQuestion({ userName, userId, answer, questionId, title, answerTime })
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            message: '提交成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -93,7 +125,10 @@ exports.deleteQuestion = async (req, res) => {
     try {
         const { _id } = req.body
         const result = await questionDao.deleteQuestion({ _id })
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            message: '删除成功',
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -107,7 +142,10 @@ exports.editQuestion = async (req, res) => {
     try {
         let { title, userName, userId, single, multiple, judgement, answer, _id } = req.body
         const result = await questionDao.editQuestion({ title, userName, userId, single, multiple, judgement, answer, _id })
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            message: '修改成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -120,8 +158,15 @@ exports.editQuestion = async (req, res) => {
 exports.getAnswerQuestion = async (req, res) => {
     try {
         let { userId, pageSize = 10, currentPage = 1, title, beginTime, endTime } = req.query
-        const result = await questionDao.getAnswerQuestion({ userId, pageSize, currentPage, title, beginTime, endTime })
-        res.json(result)
+        const { answerList, total } = await questionDao.getAnswerQuestion({ userId, pageSize, currentPage, title, beginTime, endTime })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                answerList,
+                total,
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -134,8 +179,14 @@ exports.getAnswerQuestion = async (req, res) => {
 exports.getAnswerQuestionById = async (req, res) => {
     try {
         let { id } = req.params
-        const result = await questionDao.getAnswerQuestionById({ id })
-        res.json(result)
+        const { answerDetail } = await questionDao.getAnswerQuestionById({ id })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                answerDetail: obj,
+            }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,

@@ -18,15 +18,19 @@ exports.register = async (req, res) => {
             code
         } = req.body
 
-        const result = await userDao.register({ name, email, password, code, sessionCode: req.session.code })
+        const { userInfo } = await userDao.register({ name, email, password, code, sessionCode: req.session.code })
 
-        if (result.statusCode == 200) {
-            req.session.login = true
-            req.session.code = null
-            res.setHeader('token',util.createToken(result.data.userInfo,conf.jwtConfig.privateKey,{ expiresIn: conf.jwtConfig.tokenTime }))
-        }
+        req.session.login = true
+        req.session.code = null
+        res.setHeader('token', util.createToken(userInfo, conf.jwtConfig.privateKey, { expiresIn: conf.jwtConfig.tokenTime }))
 
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                userInfo
+            },
+            message: '注册成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -43,12 +47,17 @@ exports.login = async (req, res) => {
             password
         } = req.body
 
-        const result = await userDao.login({ email, password })
-        if (result.statusCode == 200) {
-            req.session.login = true
-            res.setHeader('token',util.createToken(result.data.userInfo,conf.jwtConfig.privateKey,{ expiresIn: conf.jwtConfig.tokenTime }))
-        }
-        res.json(result)
+        const { userInfo } = await userDao.login({ email, password })
+        req.session.login = true
+        res.setHeader('token', util.createToken(userInfo, conf.jwtConfig.privateKey, { expiresIn: conf.jwtConfig.tokenTime }))
+
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                userInfo
+            },
+            message: '登陆成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -103,9 +112,13 @@ exports.updatePwd = async (req, res) => {
     try {
         const { newPassword, _id, oldPassword } = req.body
 
-        const result = await userDao.updatePwd({ newPassword, _id, oldPassword })
+        const { userInfo } = await userDao.updatePwd({ newPassword, _id, oldPassword })
 
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            message: '修改成功',
+            data: { userInfo }
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,
@@ -119,9 +132,13 @@ exports.updateName = async (req, res) => {
     try {
         const { _id, name } = req.body
 
-        const result = await userDao.updateName({ _id, name })
+        const { userInfo } = await userDao.updateName({ _id, name })
 
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            data: { userInfo },
+            message: '修改成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,

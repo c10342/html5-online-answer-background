@@ -10,8 +10,6 @@ const Comments = require('../models/comment')
 
 const util = require('../util/index')
 
-const conf = require('../config/index')
-
 class QusetionDao extends Base {
     constructor() {
         super()
@@ -19,7 +17,6 @@ class QusetionDao extends Base {
         this.User = User
         this.Comments = Comments
         this.util = util
-        this.conf = conf
         this.Answers = Answers
     }
 
@@ -31,7 +28,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async addQuestion({ title, userName, userId, single, multiple, judgement, answer }) {
-        let respone = null
         try {
             const question = new this.Questions({
                 title,
@@ -45,23 +41,13 @@ class QusetionDao extends Base {
             const userRes = await this.User.findById(userId)
             if (userRes) {
                 const result = await question.save()
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '发布成功'
-                }
+                return result
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '用户不存在,请检查登录状态'
-                }
+                throw '用户不存在,请检查登录状态'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -72,7 +58,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getQuestion({ _id, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime }) {
-        let respone = null
         try {
             let params = this.getParams({
                 title,
@@ -107,21 +92,10 @@ class QusetionDao extends Base {
                     totalCount
                 })
             })
-            respone = {
-                statusCode: this.conf.successCode,
-                message: '查询成功',
-                data: {
-                    questionList: arr,
-                    total: count
-                }
-            }
+            return { questionList: arr, total: count }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -132,7 +106,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getQuestionById({ id }) {
-        let respone = null
         try {
             const result = await this.Questions.findById(id)
             if (result) {
@@ -155,26 +128,13 @@ class QusetionDao extends Base {
                     answerQuestion: result.answer.question,
                     judgementQuestion: result.judgement.question,
                 }
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '查询成功',
-                    data: {
-                        questionList: obj
-                    }
-                }
+                return { questionList: obj }
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '查询失败,没有此试卷',
-                }
+                throw '查询失败,没有此试卷'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -185,7 +145,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getPublishedQuestion({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
-        let respone = null
         try {
             let params = {
                 userId,
@@ -217,21 +176,10 @@ class QusetionDao extends Base {
                     totalCount
                 })
             })
-            respone = {
-                statusCode: this.conf.successCode,
-                message: '查询成功',
-                data: {
-                    publishedQuestion: arr,
-                    total: count
-                }
-            }
+            return { publishedQuestion: arr, total: count }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -242,7 +190,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getPublishedQuestionById({ id }) {
-        let respone = null
         try {
             const result = await this.Questions.findById({
                 _id: id
@@ -254,27 +201,15 @@ class QusetionDao extends Base {
                 obj.multiple = result.multiple.question
                 obj.judgement = result.judgement.question
                 obj.answer = result.answer.question
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '查询成功',
-                    data: {
-                        questionDetail: obj,
-                    }
-                }
+
+                return { questionDetail: obj }
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '查询失败,没有此试卷',
-                }
+                throw '查询失败,没有此试卷'
             }
 
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -284,8 +219,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async submitQuestion({ userName, userId, answer, questionId, title,answerTime }) {
-        let respone = null
+    async submitQuestion({ userName, userId, answer, questionId, title, answerTime }) {
         try {
             const myAnswer = new this.Answers({
                 userName,
@@ -296,17 +230,10 @@ class QusetionDao extends Base {
                 answerTime
             })
             const result = await myAnswer.save()
-            respone = {
-                statusCode: this.conf.successCode,
-                message: '提交成功'
-            }
+            return result
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -317,7 +244,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async deleteQuestion({ _id }) {
-        let respone = null
         try {
             const qResult = await this.Questions.deleteMany({
                 _id
@@ -328,17 +254,10 @@ class QusetionDao extends Base {
             const cResult = await this.Comments.deleteMany({
                 questionId: _id
             })
-            respone = {
-                statusCode: this.conf.successCode,
-                message: '删除成功',
-            }
+            return '删除成功'
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -349,7 +268,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async editQuestion({ title, userName, userId, single, multiple, judgement, answer, _id }) {
-        let respone = null
         try {
             const qResult = await this.Questions.where({
                 _id
@@ -369,17 +287,10 @@ class QusetionDao extends Base {
                 userName,
                 userId
             })
-            respone = {
-                statusCode: this.conf.successCode,
-                message: '修改成功'
-            }
+            return aResult
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -390,7 +301,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getAnswerQuestion({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
-        let respone = null
         try {
             let params = {
                 userId,
@@ -411,27 +321,13 @@ class QusetionDao extends Base {
             const total = await this.Answers.countDocuments(params)
             let data = this.statisticsQuestion({ result })
             if (result) {
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '查询成功',
-                    data: {
-                        answerList: data,
-                        total,
-                    }
-                }
+                return { answerList: data, total }
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '查询失败',
-                }
+                throw '查询失败'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
     /**
@@ -442,7 +338,6 @@ class QusetionDao extends Base {
      * @memberof QusetionDao
      */
     async getAnswerQuestionById({ id }) {
-        let respone = null
         try {
             //子表关联主表查询，populate里面为子表外键
             const item = await this.Answers.findById({
@@ -515,26 +410,13 @@ class QusetionDao extends Base {
                     multiple: item.questionId.multiple,
                     judgement: item.questionId.judgement
                 }
-                respone = {
-                    statusCode: this.conf.successCode,
-                    message: '查询成功',
-                    data: {
-                        answerDetail: obj,
-                    }
-                }
+                return { answerDetail: obj }
             } else {
-                respone = {
-                    statusCode: this.conf.errorCode,
-                    message: '查询失败,没有此试卷',
-                }
+                throw '查询失败,没有此试卷'
             }
         } catch (error) {
-            respone = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respone
     }
 
 }

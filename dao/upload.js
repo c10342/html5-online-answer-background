@@ -1,10 +1,8 @@
 const XLSX = require('xlsx');
-const conf = require('../config/index')
 const util = require('../util/index')
 
 class UploadDao {
     constructor() {
-        this.conf = conf
         this.util = util
     }
 
@@ -16,7 +14,6 @@ class UploadDao {
      * @memberof UploadDao
      */
     handelData(excelFile) {
-        let respond = null
         try {
             let obj = {}
             let sheets = XLSX.read(excelFile);// 解析Excel，sheets存的一个Excel页签
@@ -27,25 +24,20 @@ class UploadDao {
                 let { "!margins": a, '!ref': b, ...data } = sheets.Sheets[item]
                 let d = this[item](data)
                 obj[item] = d.data
-                if(d.message){
-                    message+=d.message+','
+                if (d.message) {
+                    message += d.message + ','
                 }
             });
-            message = message?message.substring(0,message.length-1)+'解析失败':''
-            respond = {
-                statusCode: this.conf.successCode,
+            message = message ? message.substring(0, message.length - 1) + '解析失败' : ''
+            return {
                 data: {
                     question: obj
                 },
                 message
             }
         } catch (error) {
-            respond = {
-                statusCode: this.conf.errorCode,
-                message: error.toString()
-            }
+            throw error.toString()
         }
-        return respond
     }
 
     /**
@@ -64,12 +56,11 @@ class UploadDao {
             }
 
             if (arr.length % 6 != 0) {
-                return {message:'单选题',data:[]}
+                return { message: '单选题', data: [] }
             }
 
             let single = []
             for (let i = 0; i < arr.length; i += 6) {
-                // let id = Date.now().toString();
                 let id = this.util.getRandomStr()
                 let j = i
                 single.push({
@@ -80,7 +71,7 @@ class UploadDao {
                     message: ""
                 });
             }
-            return {data:single}
+            return { data: single }
         } catch (error) {
             throw new Error(error)
         }
@@ -101,7 +92,7 @@ class UploadDao {
                 arr.push(item)
             }
             if (arr.length % 6 != 0) {
-                return {message:'多选题',data:[]}
+                return { message: '多选题', data: [] }
             }
 
             let multiple = []
@@ -116,7 +107,7 @@ class UploadDao {
                     message: ""
                 });
             }
-            return {data:multiple}
+            return { data: multiple }
         } catch (error) {
             throw new Error(error)
         }
@@ -137,7 +128,7 @@ class UploadDao {
                 arr.push(item)
             }
             if (arr.length % 2 != 0) {
-                return {message:'判断题',data:[]}
+                return { message: '判断题', data: [] }
             }
 
             let judgement = []
@@ -151,7 +142,7 @@ class UploadDao {
                     message: ""
                 });
             }
-            return {data:judgement}
+            return { data: judgement }
         } catch (error) {
             throw new Error(error)
         }
@@ -172,7 +163,7 @@ class UploadDao {
                 arr.push(item)
             }
             if (arr.length % 2 != 0) {
-                return {message:'简答题',data:[]}
+                return { message: '简答题', data: [] }
             }
 
             let answer = []
@@ -186,7 +177,7 @@ class UploadDao {
                     message: ""
                 });
             }
-            return {data:answer}
+            return { data: answer }
         } catch (error) {
             throw new Error(error)
         }

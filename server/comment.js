@@ -5,30 +5,40 @@ const CommentDao = require('../dao/comment')
 const commentDao = new CommentDao()
 
 // 发表评论
-exports.submitComment = async (req,res) => {
+exports.submitComment = async (req, res) => {
     try {
-        let {userName,content,questionId,userId} = req.body
-        const result = await commentDao.submitComment({userName,content,questionId,userId})
-        res.json(result)
+        let { userName, content, questionId, userId } = req.body
+        const result = await commentDao.submitComment({ userName, content, questionId, userId })
+        res.json({
+            statusCode: conf.successCode,
+            message: '发表成功'
+        })
     } catch (error) {
         res.json({
-            statusCode:400,
-            message:error.toString()
+            statusCode: 400,
+            message: error.toString()
         })
     }
 }
 
 // 获取评论列表
-exports.getCommentList = async (req,res) => {
+exports.getCommentList = async (req, res) => {
     try {
-        let {id} = req.params
-        let {pageSize=10,currentPage=1,userName,beginTime,endTime,content} = req.query
-        const result = await commentDao.getCommentList({questionId:id,pageSize,currentPage,userName,beginTime,endTime,content})
-        res.json(result)
+        let { id } = req.params
+        let { pageSize = 10, currentPage = 1, userName, beginTime, endTime, content } = req.query
+        const { commentList, total } = await commentDao.getCommentList({ questionId: id, pageSize, currentPage, userName, beginTime, endTime, content })
+        res.json({
+            statusCode: conf.successCode,
+            message: '查询成功',
+            data: {
+                commentList,
+                total
+            }
+        })
     } catch (error) {
         res.json({
-            statusCode:400,
-            message:error.toString()
+            statusCode: 400,
+            message: error.toString()
         })
     }
 }

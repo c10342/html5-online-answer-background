@@ -8,13 +8,17 @@ exports.uploadFile = (req, res) => {
     try {
         let excelFile = req.files.file.data;
 
-        const result = uploadDao.handelData(excelFile)
+        const { data, message } = uploadDao.handelData(excelFile)
 
-        res.json(result)
+        res.json({
+            statusCode: conf.successCode,
+            data,
+            message
+        })
     } catch (error) {
         res.json({
-            statusCode:conf.errorCode,
-            message:error.toString()
+            statusCode: conf.errorCode,
+            message: error.toString()
         })
     }
 }

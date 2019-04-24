@@ -1,4 +1,4 @@
-importScripts("/precache-manifest.d42fce0b4f03e221b5705d24668e9bb0.js", "https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
+importScripts("/precache-manifest.4d1274fbf161c0a1b4d2b14e6f9b346e.js", "https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 
 workbox.core.setCacheNameDetails({prefix: "vue-pwa"});
@@ -15,7 +15,7 @@ workbox.routing.registerRoute(function(obj){
     }
     // true缓存，false不缓存，这样可以选择缓存那些请求
     return true
-},workbox.strategies.staleWhileRevalidate())
+},workbox.strategies.networkFirst())
 // workbox.strategies.cacheFirst()缓存优先
 // workbox.strategies.networkFirst()网络优先
 
