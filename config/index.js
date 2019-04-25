@@ -59,6 +59,24 @@ module.exports = {
 
     // 白名单
     get whiteList(){
-        return ['/user/login', '/user/register', '/user/sendCode', '/user/logout']
+        return ['/user/login', '/user/register', '/user/sendCode', '/user/logout','/user/getGithubInfo']
     },
+
+    githubConf:{
+        get clientID(){
+            return 'a82354ff0df1d871f371'
+        },
+        get clientSecret(){
+            return '461bfeb730df4444779cf0b2e50e5238fe87ad59'
+        },
+        get access_token_url(){
+            return 'https://github.com/login/oauth/access_token'
+        },
+        get redirect_uri(){
+            return 'http://120.79.209.208:9092'
+        },
+        get user_info_url(){
+            return 'https://api.github.com/user?'
+        }
+    }
 }

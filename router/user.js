@@ -22,4 +22,7 @@ router.post('/updateName',user.updateName)
 // 退出登录
 router.get('/logout',user.logout)
 
+// github登录
+router.get('/getGithubInfo',user.getGithubInfo)
+
 module.exports = router

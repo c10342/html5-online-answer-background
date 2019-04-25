@@ -4,11 +4,14 @@ const util = require('../util')
 
 const nodemailer = require('nodemailer')
 
+const conf = require('../config/index')
+
 class UserDao {
     constructor() {
         this.User = User
         this.util = util
         this.nodemailer = nodemailer
+        this.conf = conf
     }
 
     /**
@@ -18,7 +21,13 @@ class UserDao {
      * @returns 
      * @memberof UserDao
      */
-    async register({ name, email, password, code, sessionCode }) {
+    async register({
+        name,
+        email,
+        password,
+        code,
+        sessionCode
+    }) {
         try {
             // 查询是否存在该邮箱
             const emailRes = await this.User.findOne({
@@ -41,7 +50,9 @@ class UserDao {
                     })
                     // 插入数据
                     const userRes = await user.save()
-                    return {userInfo: userRes}
+                    return {
+                        userInfo: userRes
+                    }
                 }
             }
         } catch (error) {
@@ -56,7 +67,10 @@ class UserDao {
      * @returns 
      * @memberof UserDao
      */
-    async login({ email, password }) {
+    async login({
+        email,
+        password
+    }) {
         try {
             const userRes = await this.User.findOne({
                 email
@@ -65,9 +79,11 @@ class UserDao {
             if (userRes) {
                 // 密码不相等
                 if (userRes.password != this.util.cryptoPwd(password)) {
-                    throw '密码错误' 
+                    throw '密码错误'
                 } else {
-                    return {userInfo: userRes}
+                    return {
+                        userInfo: userRes
+                    }
                 }
             } else { //邮箱不存在
                 throw '邮箱不存在'
@@ -85,16 +101,28 @@ class UserDao {
      * @returns 
      * @memberof UserDao
      */
-    async updatePwd({ newPassword, _id, oldPassword }) {
+    async updatePwd({
+        newPassword,
+        _id,
+        oldPassword
+    }) {
         try {
-            const result1 = await this.User.findOne({ _id: _id })
+            const result1 = await this.User.findOne({
+                _id: _id
+            })
             if (!result1) {
                 throw '用户不存在，请检查登录状态'
             } else if (this.util.cryptoPwd(oldPassword) == result1.password) {
                 // { new: true }获取更新后的数据
-                const result2 = await this.User.findByIdAndUpdate(_id, { password: this.util.cryptoPwd(newPassword) }, { new: true })
+                const result2 = await this.User.findByIdAndUpdate(_id, {
+                    password: this.util.cryptoPwd(newPassword)
+                }, {
+                    new: true
+                })
                 if (result2) {
-                    return { userInfo: result2 }
+                    return {
+                        userInfo: result2
+                    }
                 } else {
                     throw '修改失败，请检查登录状态'
                 }
@@ -113,14 +141,46 @@ class UserDao {
      * @returns 
      * @memberof UserDao
      */
-    async updateName({ _id, name }) {
+    async updateName({
+        _id,
+        name
+    }) {
         try {
-            const result = await this.User.findByIdAndUpdate(_id, { name }, { new: true })
+            const result = await this.User.findByIdAndUpdate(_id, {
+                name
+            }, {
+                new: true
+            })
             if (result) {
-                return { userInfo: result }
+                return {
+                    userInfo: result
+                }
             } else {
                 throw '修改失败，请检查登录状态'
             }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     *获取用户github信息
+     *
+     * @param {*} {code}
+     * @memberof UserDao
+     */
+    async getGithubInfo({
+        code
+    }) {
+        try {
+            const accessToken = await this.util.get(this.conf.githubConf.access_token_url, {
+                client_id: this.conf.githubConf.clientID,
+                client_secret: this.conf.githubConf.clientSecret,
+                code: code,
+                redirect_uri: this.conf.githubConf.redirect_uri
+            })
+            const result = await this.util.get(this.conf.githubConf.user_info_url+accessToken,{},{'User-Agent': 'c10342'})
+            return result
         } catch (error) {
             throw error.toString()
         }
