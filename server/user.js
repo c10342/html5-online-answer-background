@@ -216,28 +216,17 @@ exports.getGithubInfo = async (req, res) => {
         const result = await userDao.getGithubInfo({
             code
         })
-        if (result.id) {
+        if (result) {
             req.session.login = true
-            res.setHeader('token', util.createToken({
-                _id: result.id,
-                name: result.name,
-                email: result.login,
-                createTime: result.created_at,
-                password: result.login
-            }, conf.jwtConfig.privateKey, {
-                expiresIn: conf.jwtConfig.tokenTime
-            }))
+            res.setHeader('token', util.createToken(result, conf.jwtConfig.privateKey, {
+                    expiresIn: conf.jwtConfig.tokenTime
+                }))
+
             res.json({
                 statusCode: conf.successCode,
                 message: '成功',
                 data: {
-                    userInfo: {
-                        _id: result.id,
-                        name: result.name,
-                        email: result.login,
-                        createTime: result.created_at,
-                        password: result.login
-                    }
+                    userInfo: result
                 }
             })
         } else {

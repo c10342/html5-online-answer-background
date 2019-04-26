@@ -82,9 +82,7 @@ exports.post = (url, params = {}) => {
 }
 
 // 产生4位随机数
-exports.getCode = () => {
-    let max = 10000
-    let min = 1000
+exports.getCode = (min=1000,max = 10000) => {
     let code = Math.floor(Math.random() * (max - min + 1) + min)
     return code
 }

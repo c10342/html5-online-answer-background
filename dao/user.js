@@ -117,8 +117,8 @@ class UserDao {
                 const result2 = await this.User.findByIdAndUpdate(_id, {
                     password: this.util.cryptoPwd(newPassword)
                 }, {
-                    new: true
-                })
+                        new: true
+                    })
                 if (result2) {
                     return {
                         userInfo: result2
@@ -149,8 +149,8 @@ class UserDao {
             const result = await this.User.findByIdAndUpdate(_id, {
                 name
             }, {
-                new: true
-            })
+                    new: true
+                })
             if (result) {
                 return {
                     userInfo: result
@@ -179,8 +179,30 @@ class UserDao {
                 code: code,
                 redirect_uri: this.conf.githubConf.redirect_uri
             })
-            const result = await this.util.get(this.conf.githubConf.user_info_url+accessToken,{},{'User-Agent': 'c10342'})
-            return result
+            const result = await this.util.get(this.conf.githubConf.user_info_url + accessToken, {}, { 'User-Agent': 'c10342' })
+            if (!result || !result.id) {
+                return null
+            }
+            const userRes = await this.User.findOne({ githubId: result.id })
+            if (userRes) {
+                return await this.User.findOneAndUpdate({ githubId: result.id }, {
+                    name: result.name,
+                    email: result.login,
+                    password: this.util.cryptoPwd(result.login)
+                }, {
+                        new: true
+                    })
+            } else {
+                // 加密
+                let password = this.util.cryptoPwd(result.login)
+                const user = new this.User({
+                    name: result.name,
+                    email: result.login,
+                    password,
+                    githubId: result.id
+                })
+                return await user.save()
+            }
         } catch (error) {
             throw error.toString()
         }
