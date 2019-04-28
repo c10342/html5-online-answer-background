@@ -184,7 +184,7 @@ exports.getAnswerQuestionById = async (req, res) => {
             statusCode: conf.successCode,
             message: '查询成功',
             data: {
-                answerDetail: obj,
+                answerDetail
             }
         })
     } catch (error) {
