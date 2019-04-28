@@ -186,7 +186,7 @@ class UserDao {
             const userRes = await this.User.findOne({ githubId: result.id })
             if (userRes) {
                 return await this.User.findOneAndUpdate({ githubId: result.id }, {
-                    name: result.name,
+                    name: result.name || result.login,
                     email: result.login,
                     password: this.util.cryptoPwd(result.login)
                 }, {
@@ -196,7 +196,7 @@ class UserDao {
                 // 加密
                 let password = this.util.cryptoPwd(result.login)
                 const user = new this.User({
-                    name: result.name,
+                    name: result.name || result.login,
                     email: result.login,
                     password,
                     githubId: result.id

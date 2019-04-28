@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "cross-env port=5000 host=localhost nodemon --inspect ./index.js"
+    "server": "cross-env port=9092 host=172.18.242.102 nodemon --inspect ./index.js"
   },
   "keywords": [],
   "author": "",
