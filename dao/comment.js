@@ -4,11 +4,14 @@ const Comments = require('../models/comment')
 
 const Answer = require('../models/answer')
 
+const Xss = require('xss')
+
 class CommentDao extends Base {
     constructor() {
         super()
         this.Comments = Comments
         this.Answer = Answer
+        this.Xss = Xss
     }
 
     /**
@@ -20,6 +23,7 @@ class CommentDao extends Base {
      */
     async submitComment({ userName, content, questionId, userId }) {
         try {
+            content = this.Xss(content)
             const comment = new this.Comments({ userName, content, questionId, userId })
             await comment.save()
             const result = await this.Answer.where({ userId, questionId }).updateOne({ isComment: true })
