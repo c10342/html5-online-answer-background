@@ -6,8 +6,11 @@ const nodemailer = require('nodemailer')
 
 const conf = require('../config/index')
 
-class UserDao {
+const Base = require('./base')
+
+class UserDao extends Base {
     constructor() {
+        super()
         this.User = User
         this.util = util
         this.nodemailer = nodemailer
@@ -207,6 +210,52 @@ class UserDao {
             throw error.toString()
         }
     }
+
+    /**
+     *获取用户列表
+     *
+     * @param {*} { id, pageSize = 10, currentPage = 1, userName, beginTime, endTime }
+     * @returns
+     * @memberof UserDao
+     */
+    async getUserList({ email,id, pageSize = 10, currentPage = 1, name, beginTime, endTime }) {
+        try {
+            let params = { _id: { '$ne': id }, ...this.getParams({email, name, beginTime, endTime }) }
+            const userList = await this.User.find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({ '_id': -1 })
+            const total = await this.User.countDocuments(params)
+            return { userList, total }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     *删除用户
+     *
+     * @param {*} {id}
+     * @memberof UserDao
+     */
+    async deleteUser({id}){
+        try {
+            const result = this.User.remove({_id:id})
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    async updateJurisdiction({id,jurisdiction}){
+        try {
+            const result = await this.User.where({_id:id}).updateOne({jurisdiction})
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
 }
 
 module.exports = UserDao

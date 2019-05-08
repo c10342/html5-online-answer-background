@@ -24,6 +24,17 @@ const user = new Schema({
     createTime:{
         type:Date,
         default:Date.now
+    },
+    identity:{
+        type:Number,
+        // 0普通用户,1管理员
+        default:0
+    },
+    jurisdiction:{
+        type:Array,
+        default:function(){
+            return ['1','1-1','1-2','1-3','1-4','2']
+        }
     }
 })
 

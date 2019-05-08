@@ -219,8 +219,8 @@ exports.getGithubInfo = async (req, res) => {
         if (result) {
             req.session.login = true
             res.setHeader('token', util.createToken(result, conf.jwtConfig.privateKey, {
-                    expiresIn: conf.jwtConfig.tokenTime
-                }))
+                expiresIn: conf.jwtConfig.tokenTime
+            }))
 
             res.json({
                 statusCode: conf.successCode,
@@ -235,6 +235,88 @@ exports.getGithubInfo = async (req, res) => {
                 message: '获取用户信息失败',
             })
         }
+    } catch (error) {
+        res.json({
+            statusCode: conf.errorCode,
+            message: error.toString()
+        })
+    }
+}
+
+exports.getUserList = async (req, res) => {
+    try {
+        const {
+            id, pageSize, currentPage, name, beginTime, endTime
+        } = req.query
+
+        const {
+            userList, total
+        } = await userDao.getUserList({
+            id, pageSize, currentPage, name, beginTime, endTime
+        })
+
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                userList,
+                total
+            },
+            message: '查询成功'
+        })
+    } catch (error) {
+        res.json({
+            statusCode: conf.errorCode,
+            message: error.toString()
+        })
+    }
+}
+
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const {
+            id
+        } = req.query
+
+        const result = await userDao.deleteUser({
+            id
+        })
+
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                result
+            },
+            message: '删除成功'
+        })
+    } catch (error) {
+        res.json({
+            statusCode: conf.errorCode,
+            message: error.toString()
+        })
+    }
+}
+
+exports.updateJurisdiction = async (req, res) => {
+    try {
+        let {
+            id,
+            jurisdiction
+        } = req.body
+
+        jurisdiction = JSON.parse(jurisdiction)
+
+        const result = await userDao.updateJurisdiction({
+            id, jurisdiction
+        })
+
+        res.json({
+            statusCode: conf.successCode,
+            data: {
+                result
+            },
+            message: '分配成功'
+        })
     } catch (error) {
         res.json({
             statusCode: conf.errorCode,

@@ -6,7 +6,7 @@ class Base {
      * @returns 
      * @memberof Base
      */
-    getParams({ title, beginTime, endTime, userName, content }) {
+    getParams({email, title, beginTime, endTime, userName, content,name }) {
         let params = {}
         if (title) {
             // 模糊查询
@@ -17,6 +17,12 @@ class Base {
         }
         if (content) {
             params.content = new RegExp(content)
+        }
+        if(email){
+            params.email = new RegExp(email)
+        }
+        if(name){
+            params.name = name
         }
         if (beginTime) {
             if (params.createTime) {
