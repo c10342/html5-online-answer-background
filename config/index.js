@@ -73,7 +73,8 @@ module.exports = {
             return 'https://github.com/login/oauth/access_token'
         },
         get redirect_uri(){
-            return 'http://120.79.209.208:9092'
+            // return 'http://120.79.209.208:9092'
+            return 'https://c10342.mynatapp.cc'
         },
         get user_info_url(){
             return 'https://api.github.com/user?'
