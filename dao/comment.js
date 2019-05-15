@@ -21,13 +21,11 @@ class CommentDao extends Base {
      * @returns 
      * @memberof CommentDao
      */
-    async submitComment({ userName, content, questionId, userId }) {
+    async submitComment({ userName, content, questionId, userId,title }) {
         try {
             content = this.Xss(content)
-            const comment = new this.Comments({ userName, content, questionId, userId })
-            await comment.save()
-            const result = await this.Answer.where({ userId, questionId }).updateOne({ isComment: true })
-            return result
+            const comment = new this.Comments({ userName, content, questionId, userId,title })
+            return await comment.save()
         } catch (error) {
             throw error.toString()
         }
@@ -54,6 +52,37 @@ class CommentDao extends Base {
                     userName: item.userName,
                     content: item.content,
                     createTime: item.createTime
+                })
+            });
+            return {commentList: arr,total}
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+
+    /**
+     * 获取用户评论列表
+     * 
+     * @param {any} { userId, pageSize=10, currentPage=1, beginTime, endTime, content } 
+     * @returns 
+     * @memberof CommentDao
+     */
+    async getUserComment({ userId, pageSize=10, currentPage=1, beginTime, endTime, content }) {
+        try {
+            let params = { userId, ...this.getParams({ content, beginTime, endTime }) }
+            const result = await this.Comments.find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({ '_id': -1 })
+            const total = await this.Comments.countDocuments(params)
+            let arr = []
+            result.forEach(item => {
+                arr.push({
+                    userName: item.userName,
+                    content: item.content,
+                    createTime: item.createTime,
+                    title:item.title
                 })
             });
             return {commentList: arr,total}

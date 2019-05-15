@@ -26,14 +26,14 @@ const user = new Schema({
         default:Date.now
     },
     identity:{
-        type:Number,
-        // 0普通用户,1管理员
-        default:0
+        type:String,
+        // 0管理员，1小学生，2初中生，3高中生，4大学生，5教师，6游客，7其他
+        required:true
     },
     jurisdiction:{
         type:Array,
         default:function(){
-            return ['1','1-1','1-2','1-3','1-4','2']
+            return ['1','1-1','1-2','1-3','1-4','2','3']
         }
     }
 })

@@ -36,6 +36,14 @@ const questions = new Schema({
     createTime:{
         type:Date,
         default:Date.now
+    },
+    checkList:{
+        required:true,
+        type:String,
+    },
+    questionType:{
+        required:true,
+        type:String
     }
 })
 

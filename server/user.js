@@ -15,7 +15,8 @@ exports.register = async (req, res) => {
             name,
             email,
             password,
-            code
+            code,
+            identity
         } = req.body
 
         const {
@@ -25,7 +26,8 @@ exports.register = async (req, res) => {
             email,
             password,
             code,
-            sessionCode: req.session.code
+            sessionCode: req.session.code,
+            identity
         })
 
         req.session.login = true

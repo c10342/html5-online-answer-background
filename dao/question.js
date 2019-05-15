@@ -10,6 +10,8 @@ const Comments = require('../models/comment')
 
 const util = require('../util/index')
 
+const Mistakes = require('../models/mistake')
+
 class QusetionDao extends Base {
     constructor() {
         super()
@@ -18,6 +20,7 @@ class QusetionDao extends Base {
         this.Comments = Comments
         this.util = util
         this.Answers = Answers
+        this.Mistakes = Mistakes
     }
 
     /**
@@ -27,7 +30,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async addQuestion({ title, userName, userId, single, multiple, judgement, answer }) {
+    async addQuestion({ title, userName, userId, single, multiple, judgement, answer, checkList, questionType }) {
         try {
             const question = new this.Questions({
                 title,
@@ -36,7 +39,9 @@ class QusetionDao extends Base {
                 single,
                 multiple,
                 judgement,
-                answer
+                answer,
+                checkList,
+                questionType
             })
             const userRes = await this.User.findById(userId)
             if (userRes) {
@@ -57,13 +62,15 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async getQuestion({ _id, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime }) {
+    async getQuestion({ _id, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime, checkList, questionType }) {
         try {
             let params = this.getParams({
                 title,
                 userName,
                 beginTime,
-                endTime
+                endTime,
+                checkList,
+                questionType
             })
             const answerRes = await this.Answers.find({
                 userId: _id
@@ -89,7 +96,8 @@ class QusetionDao extends Base {
                     answerCount: item.answer.count,
                     isAnswer,
                     _id: item._id,
-                    totalCount
+                    totalCount,
+                    questionType: item.questionType
                 })
             })
             return { questionList: arr, total: count }
@@ -127,6 +135,7 @@ class QusetionDao extends Base {
                     multipleQuestion: result.multiple.question,
                     answerQuestion: result.answer.question,
                     judgementQuestion: result.judgement.question,
+                    questionType: result.questionType
                 }
                 return { questionList: obj }
             } else {
@@ -144,14 +153,15 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async getPublishedQuestion({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
+    async getPublishedQuestion({ questionType, userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
         try {
             let params = {
                 userId,
                 ...this.getParams({
                     title,
                     beginTime,
-                    endTime
+                    endTime,
+                    questionType
                 })
             }
             const count = await this.Questions.countDocuments(params)
@@ -173,7 +183,8 @@ class QusetionDao extends Base {
                     answerCount: item.answer.count,
                     userName: item.userName,
                     createTime: item.createTime,
-                    totalCount
+                    totalCount,
+                    questionType: item.questionType
                 })
             })
             return { publishedQuestion: arr, total: count }
@@ -201,7 +212,8 @@ class QusetionDao extends Base {
                 obj.multiple = result.multiple.question
                 obj.judgement = result.judgement.question
                 obj.answer = result.answer.question
-
+                obj.checkList = result.checkList
+                obj.questionType = result.questionType
                 return { questionDetail: obj }
             } else {
                 throw '查询失败,没有此试卷'
@@ -219,7 +231,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async submitQuestion({ userName, userId, answer, questionId, title, answerTime }) {
+    async submitQuestion({ userName, userId, answer, questionId, title, answerTime, questionType }) {
         try {
             const myAnswer = new this.Answers({
                 userName,
@@ -227,9 +239,86 @@ class QusetionDao extends Base {
                 answer,
                 questionId,
                 title,
-                answerTime
+                answerTime,
+                questionType
             })
             const result = await myAnswer.save()
+
+            //子表关联主表查询，populate里面为子表外键
+            const item = await this.Answers.findById({
+                _id: result._id
+            }).populate('questionId')
+            
+            // 单选题
+            let single = item.questionId.single
+            if (single) {
+                let singleQuestion = single.question
+                singleQuestion.forEach(async q => {
+                    if (!(item.answer[q.id] && item.answer[q.id] == single.answer[q.id])) {
+                        q.message = q.answer
+                        q.answer = item.answer[q.id] ? item.answer[q.id] : ''
+                        let s = new this.Mistakes({
+                            userId,
+                            types:0,
+                            question:q
+                        })
+                        await s.save()
+                    }
+                })
+            }
+
+            // 多选题
+            let multiple = item.questionId.multiple
+            if (multiple) {
+                let multipleQuestion = multiple.question
+                multipleQuestion.forEach(async q => {
+                    if (!(item.answer[q.id] && item.answer[q.id].sort().toString() == multiple.answer[q.id])) {
+                        q.message = q.answer
+                        q.answer = item.answer[q.id] ? item.answer[q.id] : []
+                        let s = new this.Mistakes({
+                            userId,
+                            types:1,
+                            question:q
+                        })
+                        await s.save()
+                    }
+                })
+            }
+
+            // 判断题
+            let judgement = item.questionId.judgement
+            if (judgement) {
+                let judgementQuestion = judgement.question
+                judgementQuestion.forEach(async q => {
+                    if (!(item.answer[q.id] && item.answer[q.id] == judgement.answer[q.id])) {
+                        q.message = q.answer == 'A' ? '对' : '错'
+                        q.answer = item.answer[q.id] ? item.answer[q.id] : ''
+                        let s = new this.Mistakes({
+                            userId,
+                            types:2,
+                            question:q
+                        })
+                        await s.save()
+                    }
+                })
+            }
+            // 简答题
+            let answer1 = item.questionId.answer
+            if (answer1) {
+                let answerQuestion = answer1.question
+                answerQuestion.forEach(async q => {
+                    if (!(item.answer[q.id] && this.util.strSimilarity2Percent(item.answer[q.id], answer1.answer[q.id])) > 0.5) {
+                        q.message = q.answer
+                        q.answer = item.answer[q.id] ? item.answer[q.id] : ''
+                        let s = new this.Mistakes({
+                            userId,
+                            types:3,
+                            question:q
+                        })
+                        await s.save()
+                    }
+                })
+            }
             return result
         } catch (error) {
             throw error.toString()
@@ -267,7 +356,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async editQuestion({ title, userName, userId, single, multiple, judgement, answer, _id }) {
+    async editQuestion({ title, userName, userId, single, multiple, judgement, answer, _id, checkList, questionType }) {
         try {
             const qResult = await this.Questions.where({
                 _id
@@ -278,7 +367,9 @@ class QusetionDao extends Base {
                 single,
                 multiple,
                 judgement,
-                answer
+                answer,
+                checkList,
+                questionType
             })
             const aResult = await this.Answers.where({
                 questionId: _id
@@ -300,14 +391,15 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async getAnswerQuestion({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
+    async getAnswerQuestion({ questionType, userId, pageSize = 10, currentPage = 1, title, beginTime, endTime }) {
         try {
             let params = {
                 userId,
                 ...this.getParams({
                     title,
                     beginTime,
-                    endTime
+                    endTime,
+                    questionType
                 })
             }
             //子表关联主表查询，populate里面为子表外键

@@ -23,11 +23,11 @@ const answer = new Schema({
     answer:{
         type:Object,
     },
-    isComment:{
-        type:Boolean,
-        default:false
-    },
     answerTime:{
+        type:String,
+        required:true
+    },
+    questionType:{
         type:String,
         required:true
     },

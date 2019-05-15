@@ -23,6 +23,10 @@ const comment = new Schema({
     createTime:{
         type:Date,
         default:Date.now
+    },
+    title:{
+        type:String,
+        required:true
     }
 })
 

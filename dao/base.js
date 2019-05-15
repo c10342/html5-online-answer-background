@@ -6,7 +6,7 @@ class Base {
      * @returns 
      * @memberof Base
      */
-    getParams({email, title, beginTime, endTime, userName, content,name }) {
+    getParams({email, title, beginTime, endTime, userName, content,name,checkList,questionType }) {
         let params = {}
         if (title) {
             // 模糊查询
@@ -22,7 +22,13 @@ class Base {
             params.email = new RegExp(email)
         }
         if(name){
-            params.name = name
+            params.name = new RegExp(name)
+        }
+        if(checkList){
+            params.checkList = new RegExp(checkList)
+        }
+        if(questionType){
+            params.questionType = new RegExp(questionType)
         }
         if (beginTime) {
             if (params.createTime) {
@@ -114,7 +120,6 @@ class Base {
                     answerId: item._id,
                     userName: item.userName,
                     createTime: item.createTime,
-                    isComment: item.isComment,
                     questionId: item.questionId._id,
                     correctCount,
                     totalCount,

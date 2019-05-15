@@ -29,7 +29,8 @@ class UserDao extends Base {
         email,
         password,
         code,
-        sessionCode
+        sessionCode,
+        identity
     }) {
         try {
             // 查询是否存在该邮箱
@@ -49,7 +50,8 @@ class UserDao extends Base {
                     const user = new this.User({
                         name,
                         email,
-                        password
+                        password,
+                        identity
                     })
                     // 插入数据
                     const userRes = await user.save()

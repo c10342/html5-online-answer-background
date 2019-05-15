@@ -99,6 +99,7 @@ class StatisticsDao extends Base {
                     createTime: item.createTime,
                     questionId: item._id,
                     percent: count / (totalQuestion * aResult.length),
+                    questionType:item.questionType
                 })
             }
             return {list: arr,total}
