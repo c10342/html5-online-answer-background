@@ -34,6 +34,18 @@ router.get('/getAnswerQuestion',questions.getAnswerQuestion)
 // 根据答卷的id查询该答卷的详细信息
 router.get('/getAnswerQuestionById/:id',questions.getAnswerQuestionById)
 
+// 查询错题
+router.get('/getMistake',questions.getMistake)
+
+// 收藏试题
+router.get('/collectQuestion',questions.collectQuestion)
+
+// 取消收藏试题
+router.get('/cancelCollectQuestion',questions.cancelCollectQuestion)
+
+// 获取收藏的试题
+router.get('/getCollectQuestion',questions.getCollectQuestion)
+
 
 module.exports = router
 

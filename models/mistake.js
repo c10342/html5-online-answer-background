@@ -7,6 +7,10 @@ const mistakes = new Schema({
         type:String,
         required:true
     },
+    title:{
+        type:String,
+        required:true
+    },
     types:{
         //0单选，1多选，2判断，3简答
         type:Number,

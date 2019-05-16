@@ -195,3 +195,80 @@ exports.getAnswerQuestionById = async (req, res) => {
     }
 }
 
+// 查询错题
+exports.getMistake = async (req,res) => {
+    try {
+        const {userId,types,currentPage=1,pageSize=10,beginTime,endTime,title} = req.query
+        const {mistakeList,total} = await questionDao.getMistake({userId,types,currentPage,pageSize,beginTime,endTime,title})
+        res.json({
+            statusCode:conf.successCode,
+            message:'查询成功',
+            data:{
+                mistakeList,total
+            }
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+
+
+// 收藏试题
+exports.collectQuestion = async (req,res) => {
+    try {
+        const {userId,questionId} = req.query
+        const result = await questionDao.collectQuestion({userId,questionId})
+        res.json({
+            statusCode:conf.successCode,
+            message:'收藏成功',
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+
+
+// 取消收藏试题
+exports.cancelCollectQuestion = async (req,res) => {
+    try {
+        const {userId,questionId} = req.query
+        const result = await questionDao.cancelCollectQuestion({userId,questionId})
+        res.json({
+            statusCode:conf.successCode,
+            message:'取消收藏成功',
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+
+// 获取收藏试题
+exports.getCollectQuestion = async (req,res) => {
+    try {
+        const {userId,pageSize = 10, currentPage = 1, title, userName, beginTime, endTime,checkList,questionType} = req.query
+        const {collectionList,total} = await questionDao.getCollectQuestion({userId,pageSize, currentPage, title, userName, beginTime, endTime,checkList,questionType})
+        res.json({
+            statusCode:conf.successCode,
+            message:'查询成功',
+            data: {
+                collectionList,
+                total
+            }
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+

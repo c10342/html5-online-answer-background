@@ -59,7 +59,16 @@ module.exports = {
 
     // 白名单
     get whiteList(){
-        return ['/user/login', '/user/register', '/user/sendCode', '/user/logout','/user/getGithubInfo','/downLoad/downLoadTemplate']
+        return [
+            '/user/login', 
+            '/user/register', 
+            '/user/sendCode', 
+            '/user/logout',
+            '/user/getGithubInfo',
+            '/downLoad/downLoadTemplate',
+            '/questions/submitQuestion',
+            '/questions/getQuestionById'
+        ]
     },
 
     githubConf:{

@@ -12,6 +12,8 @@ const util = require('../util/index')
 
 const Mistakes = require('../models/mistake')
 
+const Collections = require('../models/collection')
+
 class QusetionDao extends Base {
     constructor() {
         super()
@@ -21,6 +23,7 @@ class QusetionDao extends Base {
         this.util = util
         this.Answers = Answers
         this.Mistakes = Mistakes
+        this.Collections = Collections
     }
 
     /**
@@ -82,10 +85,13 @@ class QusetionDao extends Base {
                 .sort({
                     '_id': -1
                 })
+
+            const collection = await this.Collections.findOne({userId:_id})
             let arr = []
             result.forEach((item) => {
                 let totalCount = item.single.count + item.multiple.count + item.judgement.count + item.answer.count
                 let isAnswer = answerRes.findIndex(i => i.questionId == item._id.toString()) > -1 ? true : false
+                let isCollection = collection?collection.questionId.includes(item._id.toString()):false
                 arr.push({
                     title: item.title,
                     userName: item.userName,
@@ -97,7 +103,8 @@ class QusetionDao extends Base {
                     isAnswer,
                     _id: item._id,
                     totalCount,
-                    questionType: item.questionType
+                    questionType: item.questionType,
+                    isCollection
                 })
             })
             return { questionList: arr, total: count }
@@ -260,7 +267,8 @@ class QusetionDao extends Base {
                         let s = new this.Mistakes({
                             userId,
                             types:0,
-                            question:q
+                            question:q,
+                            title:q.title
                         })
                         await s.save()
                     }
@@ -278,7 +286,8 @@ class QusetionDao extends Base {
                         let s = new this.Mistakes({
                             userId,
                             types:1,
-                            question:q
+                            question:q,
+                            title:q.title
                         })
                         await s.save()
                     }
@@ -292,11 +301,12 @@ class QusetionDao extends Base {
                 judgementQuestion.forEach(async q => {
                     if (!(item.answer[q.id] && item.answer[q.id] == judgement.answer[q.id])) {
                         q.message = q.answer == 'A' ? '对' : '错'
-                        q.answer = item.answer[q.id] ? item.answer[q.id] : ''
+                        q.answer = item.answer[q.id] == 'A' ? '对' : '错'
                         let s = new this.Mistakes({
                             userId,
                             types:2,
-                            question:q
+                            question:q,
+                            title:q.title
                         })
                         await s.save()
                     }
@@ -307,13 +317,14 @@ class QusetionDao extends Base {
             if (answer1) {
                 let answerQuestion = answer1.question
                 answerQuestion.forEach(async q => {
-                    if (!(item.answer[q.id] && this.util.strSimilarity2Percent(item.answer[q.id], answer1.answer[q.id])) > 0.5) {
+                    if (!(item.answer[q.id] && this.util.strSimilarity2Percent(item.answer[q.id], answer1.answer[q.id]) > 0.5)) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
                         let s = new this.Mistakes({
                             userId,
                             types:3,
-                            question:q
+                            question:q,
+                            title:q.title
                         })
                         await s.save()
                     }
@@ -506,6 +517,144 @@ class QusetionDao extends Base {
             } else {
                 throw '查询失败,没有此试卷'
             }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     *  查询错题
+     * 
+     * @param {any} {userId,types,currentPage=1,pageSize=10,beginTime,endTime,title} 
+     * @memberof QusetionDao
+     */
+    async getMistake({userId,types,currentPage=1,pageSize=10,beginTime,endTime,title}){
+        try {
+            let params = {
+                userId,
+                types,
+                ...this.getParams({
+                    beginTime,
+                    endTime,
+                    title
+                })
+            }
+            //子表关联主表查询，populate里面为子表外键
+            const result = await this.Mistakes.find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({
+                    '_id': -1
+                })
+            const total = await this.Mistakes.countDocuments(params)
+            return {mistakeList:result,total}
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     *  收藏试题
+     * 
+     * @param {any} {userId,questionId} 
+     * @returns 
+     * @memberof QusetionDao
+     */
+    async collectQuestion({userId,questionId}){
+        try {
+            const collection = await this.Collections.findOne({userId})
+            if(collection){
+                let questionIdArr = collection.questionId
+                questionIdArr.push(questionId)
+                const result = await this.Collections.where({userId}).updateOne({questionId:questionIdArr})
+                return result
+            }else{
+                let coll = new this.Collections({userId,questionId:[questionId]})
+
+                const r = coll.save()
+
+                return r
+            }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 取消收藏试题
+     * 
+     * @param {any} {userId,questionId} 
+     * @returns 
+     * @memberof QusetionDao
+     */
+    async cancelCollectQuestion({userId,questionId}){
+        try {
+            const collection = await this.Collections.findOne({userId})
+            let questionIdArr = collection.questionId
+            const index = questionIdArr.findIndex(i=>i==questionId)
+            questionIdArr.splice(index,1)
+            const result = await this.Collections.where({userId}).updateOne({questionId:questionIdArr})
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 获取收藏的试题
+     * 
+     * @param {any} { _id, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime, checkList, questionType } 
+     * @returns 
+     * @memberof QusetionDao
+     */
+    async getCollectQuestion({ userId, pageSize = 10, currentPage = 1, title, userName, beginTime, endTime, checkList, questionType }) {
+        try {
+            let _id = userId
+            let params = this.getParams({
+                title,
+                userName,
+                beginTime,
+                endTime,
+                checkList,
+                questionType
+            })
+            const collection = await this.Collections.findOne({userId})
+            if(!collection){
+             return { collectionList: [], total: 0 }
+            }
+            const answerRes = await this.Answers.find({
+                userId: _id,
+                questionId:{$in:collection.questionId}
+            }).select('questionId')
+            const count = await this.Questions.where({_id:{$in:collection.questionId}}).countDocuments(params)
+            const result = await this.Questions.where({_id:{$in:collection.questionId}}).find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({
+                    '_id': -1
+                })
+
+            let arr = []
+            result.forEach((item) => {
+                let totalCount = item.single.count + item.multiple.count + item.judgement.count + item.answer.count
+                let answerIndex = answerRes.findIndex(i => i.questionId == item._id.toString())
+                let isAnswer = answerIndex > -1 ? true : false
+                arr.push({
+                    title: item.title,
+                    userName: item.userName,
+                    createTime: item.createTime,
+                    singleCount: item.single.count,
+                    multipleCount: item.multiple.count,
+                    judgementCount: item.judgement.count,
+                    answerCount: item.answer.count,
+                    isAnswer,
+                    _id: item._id,
+                    totalCount,
+                    questionType: item.questionType,
+                    answerId:isAnswer?answerRes[answerIndex]['_id']:'-1'
+                })
+            })
+            return { collectionList: arr, total: count }
         } catch (error) {
             throw error.toString()
         }
