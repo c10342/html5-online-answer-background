@@ -1,4 +1,20 @@
+const config = require('../config')
+
+const qs = require('querystring')
+
+const util = require('../util')
+
+const User = require('../models/user')
+
+const { getItem, setExpires, setItem } = require('../redis')
+
 class Base {
+    constructor() {
+        this.config = config
+        this.util = util
+        this.User = User
+    }
+
     /**
      * 模糊查询参数
      * 
@@ -6,7 +22,7 @@ class Base {
      * @returns 
      * @memberof Base
      */
-    getParams({email, title, beginTime, endTime, userName, content,name,checkList,questionType }) {
+    getParams({ email, title, beginTime, endTime, userName, content, name, checkList, questionType }) {
         let params = {}
         if (title) {
             // 模糊查询
@@ -18,16 +34,16 @@ class Base {
         if (content) {
             params.content = new RegExp(content)
         }
-        if(email){
+        if (email) {
             params.email = new RegExp(email)
         }
-        if(name){
+        if (name) {
             params.name = new RegExp(name)
         }
-        if(checkList){
+        if (checkList) {
             params.checkList = new RegExp(checkList)
         }
-        if(questionType){
+        if (questionType) {
             params.questionType = new RegExp(questionType)
         }
         if (beginTime) {
@@ -124,11 +140,72 @@ class Base {
                     correctCount,
                     totalCount,
                     correctPercent: correctCount / totalCount,
-                    answerTime:item.answerTime
+                    answerTime: item.answerTime
                 }
                 data.push(obj)
             })
             return data
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 获取access_token
+     * 
+     * @returns 
+     * @memberof Base
+     */
+    async getBaiDuAccessToken() {
+        try {
+            let accessToken = null
+            accessToken = await getItem('access_token')
+            if (!accessToken) {
+                const param = qs.stringify({
+                    'grant_type': 'client_credentials',
+                    'client_id': this.config.baiduApi.APIKey,
+                    'client_secret': this.config.baiduApi.SecretKey
+                });
+                const url = `${this.config.baiduApi.url}?${param}`
+                const result = await this.util.post(url)
+                accessToken = result.access_token
+                await setItem('access_token', result.access_token)
+                // 设置过期时间
+                await setExpires('access_token', result.expires_in)
+            }
+            return accessToken
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     *  校验文本是否包含垃圾内容
+     * 
+     * @param {any} text 
+     * @returns 
+     * @memberof Base
+     */
+    async checkText(text,userId) {
+        try {
+            const accessToken = await this.getBaiDuAccessToken()
+            const result = await this.util.post(`${this.config.baiduApi.requestUrl}?access_token=${accessToken}&content=${encodeURIComponent(text)}`,
+            {},
+            {
+                headers:{
+                    'Content-Type':'application/x-www-form-urlencoded'       
+                }
+            })
+            let message = ['12','暴恐违禁','文本色情','政治敏感','恶意推广','低俗辱骂','低质灌水']
+            let obj = {
+                spam:result.result.spam,
+                message:message[result.result.spam]
+            }
+            if(result.result.spam != 0 ){
+                const r = await this.User.findById({_id:userId})
+                await this.User.where({_id:userId}).updateOne({violationCount:r.violationCount+1})
+            }
+            return obj
         } catch (error) {
             throw error.toString()
         }

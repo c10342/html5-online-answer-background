@@ -33,8 +33,13 @@ const user = new Schema({
     jurisdiction:{
         type:Array,
         default:function(){
-            return ['1','1-1','1-2','1-3','1-4','2','3','4','5']
+            return ['1','1-1','1-2','1-3','1-4','1-5','2','3','4','5']
         }
+    },
+    // 用户发表违规信息次数
+    violationCount:{
+        type:Number,
+        default:0
     }
 })
 

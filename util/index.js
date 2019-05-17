@@ -67,9 +67,9 @@ exports.get = (url, params = {}, headers = {}) => {
 }
 
 // post请求
-exports.post = (url, params = {}) => {
+exports.post = (url, params = {},config={}) => {
     return new Promise((resolve, reject) => {
-        axios.post(url, params).then(res => {
+        axios.post(url, params,config).then(res => {
             if (res.status == 200) {
                 resolve(res.data)
             } else {

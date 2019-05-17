@@ -23,6 +23,10 @@ class CommentDao extends Base {
      */
     async submitComment({ userName, content, questionId, userId,title }) {
         try {
+            const checked = await this.checkText(content,userId)
+            if (checked.spam != 0) {
+                throw `您评论的内容包含 ${checked.message} 信息,不能发表`
+            }
             content = this.Xss(content)
             const comment = new this.Comments({ userName, content, questionId, userId,title })
             return await comment.save()

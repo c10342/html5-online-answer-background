@@ -88,5 +88,20 @@ module.exports = {
         get user_info_url(){
             return 'https://api.github.com/user?'
         }
+    },
+
+    baiduApi:{
+        get APIKey(){
+            return 'qPIrRkVYPWUPhMZkH8YTydSa'
+        },
+        get SecretKey(){
+            return 'NyvOqeTvaZVIgGyVoep2NpgZ5AAKN6Bo'
+        },
+        get url(){
+            return 'https://aip.baidubce.com/oauth/2.0/token'
+        },
+        get requestUrl(){
+            return 'https://aip.baidubce.com/rest/2.0/antispam/v2/spam'
+        }
     }
 }

@@ -35,7 +35,7 @@ class QusetionDao extends Base {
      */
     async addQuestion({ title, userName, userId, single, multiple, judgement, answer, checkList, questionType }) {
         try {
-            const question = new this.Questions({
+            let obj = {
                 title,
                 userName,
                 userId,
@@ -45,7 +45,13 @@ class QusetionDao extends Base {
                 answer,
                 checkList,
                 questionType
-            })
+            }
+            let str = JSON.stringify(obj)
+            const checked = await this.checkText(str,userId)
+            if (checked.spam != 0) {
+                throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+            }
+            const question = new this.Questions(obj)
             const userRes = await this.User.findById(userId)
             if (userRes) {
                 const result = await question.save()
@@ -86,12 +92,12 @@ class QusetionDao extends Base {
                     '_id': -1
                 })
 
-            const collection = await this.Collections.findOne({userId:_id})
+            const collection = await this.Collections.findOne({ userId: _id })
             let arr = []
             result.forEach((item) => {
                 let totalCount = item.single.count + item.multiple.count + item.judgement.count + item.answer.count
                 let isAnswer = answerRes.findIndex(i => i.questionId == item._id.toString()) > -1 ? true : false
-                let isCollection = collection?collection.questionId.includes(item._id.toString()):false
+                let isCollection = collection ? collection.questionId.includes(item._id.toString()) : false
                 arr.push({
                     title: item.title,
                     userName: item.userName,
@@ -255,7 +261,7 @@ class QusetionDao extends Base {
             const item = await this.Answers.findById({
                 _id: result._id
             }).populate('questionId')
-            
+
             // 单选题
             let single = item.questionId.single
             if (single) {
@@ -266,9 +272,9 @@ class QusetionDao extends Base {
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
                         let s = new this.Mistakes({
                             userId,
-                            types:0,
-                            question:q,
-                            title:q.title
+                            types: 0,
+                            question: q,
+                            title: q.title
                         })
                         await s.save()
                     }
@@ -285,9 +291,9 @@ class QusetionDao extends Base {
                         q.answer = item.answer[q.id] ? item.answer[q.id] : []
                         let s = new this.Mistakes({
                             userId,
-                            types:1,
-                            question:q,
-                            title:q.title
+                            types: 1,
+                            question: q,
+                            title: q.title
                         })
                         await s.save()
                     }
@@ -304,9 +310,9 @@ class QusetionDao extends Base {
                         q.answer = item.answer[q.id] == 'A' ? '对' : '错'
                         let s = new this.Mistakes({
                             userId,
-                            types:2,
-                            question:q,
-                            title:q.title
+                            types: 2,
+                            question: q,
+                            title: q.title
                         })
                         await s.save()
                     }
@@ -322,9 +328,9 @@ class QusetionDao extends Base {
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
                         let s = new this.Mistakes({
                             userId,
-                            types:3,
-                            question:q,
-                            title:q.title
+                            types: 3,
+                            question: q,
+                            title: q.title
                         })
                         await s.save()
                     }
@@ -369,9 +375,7 @@ class QusetionDao extends Base {
      */
     async editQuestion({ title, userName, userId, single, multiple, judgement, answer, _id, checkList, questionType }) {
         try {
-            const qResult = await this.Questions.where({
-                _id
-            }).updateOne({
+            let obj = {
                 title,
                 userName,
                 userId,
@@ -381,7 +385,15 @@ class QusetionDao extends Base {
                 answer,
                 checkList,
                 questionType
-            })
+            }
+            let str = JSON.stringify(obj)
+            const checked = await this.checkText(str,userId)
+            if (checked.spam != 0) {
+                throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+            }
+            const qResult = await this.Questions.where({
+                _id
+            }).updateOne(obj)
             const aResult = await this.Answers.where({
                 questionId: _id
             }).updateMany({
@@ -528,7 +540,7 @@ class QusetionDao extends Base {
      * @param {any} {userId,types,currentPage=1,pageSize=10,beginTime,endTime,title} 
      * @memberof QusetionDao
      */
-    async getMistake({userId,types,currentPage=1,pageSize=10,beginTime,endTime,title}){
+    async getMistake({ userId, types, currentPage = 1, pageSize = 10, beginTime, endTime, title }) {
         try {
             let params = {
                 userId,
@@ -547,7 +559,7 @@ class QusetionDao extends Base {
                     '_id': -1
                 })
             const total = await this.Mistakes.countDocuments(params)
-            return {mistakeList:result,total}
+            return { mistakeList: result, total }
         } catch (error) {
             throw error.toString()
         }
@@ -560,16 +572,16 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async collectQuestion({userId,questionId}){
+    async collectQuestion({ userId, questionId }) {
         try {
-            const collection = await this.Collections.findOne({userId})
-            if(collection){
+            const collection = await this.Collections.findOne({ userId })
+            if (collection) {
                 let questionIdArr = collection.questionId
                 questionIdArr.push(questionId)
-                const result = await this.Collections.where({userId}).updateOne({questionId:questionIdArr})
+                const result = await this.Collections.where({ userId }).updateOne({ questionId: questionIdArr })
                 return result
-            }else{
-                let coll = new this.Collections({userId,questionId:[questionId]})
+            } else {
+                let coll = new this.Collections({ userId, questionId: [questionId] })
 
                 const r = coll.save()
 
@@ -587,13 +599,13 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async cancelCollectQuestion({userId,questionId}){
+    async cancelCollectQuestion({ userId, questionId }) {
         try {
-            const collection = await this.Collections.findOne({userId})
+            const collection = await this.Collections.findOne({ userId })
             let questionIdArr = collection.questionId
-            const index = questionIdArr.findIndex(i=>i==questionId)
-            questionIdArr.splice(index,1)
-            const result = await this.Collections.where({userId}).updateOne({questionId:questionIdArr})
+            const index = questionIdArr.findIndex(i => i == questionId)
+            questionIdArr.splice(index, 1)
+            const result = await this.Collections.where({ userId }).updateOne({ questionId: questionIdArr })
             return result
         } catch (error) {
             throw error.toString()
@@ -618,16 +630,16 @@ class QusetionDao extends Base {
                 checkList,
                 questionType
             })
-            const collection = await this.Collections.findOne({userId})
-            if(!collection){
-             return { collectionList: [], total: 0 }
+            const collection = await this.Collections.findOne({ userId })
+            if (!collection) {
+                return { collectionList: [], total: 0 }
             }
             const answerRes = await this.Answers.find({
                 userId: _id,
-                questionId:{$in:collection.questionId}
+                questionId: { $in: collection.questionId }
             }).select('questionId')
-            const count = await this.Questions.where({_id:{$in:collection.questionId}}).countDocuments(params)
-            const result = await this.Questions.where({_id:{$in:collection.questionId}}).find(params)
+            const count = await this.Questions.where({ _id: { $in: collection.questionId } }).countDocuments(params)
+            const result = await this.Questions.where({ _id: { $in: collection.questionId } }).find(params)
                 .skip(pageSize * (currentPage - 1))
                 .limit(parseInt(pageSize))
                 .sort({
@@ -651,7 +663,7 @@ class QusetionDao extends Base {
                     _id: item._id,
                     totalCount,
                     questionType: item.questionType,
-                    answerId:isAnswer?answerRes[answerIndex]['_id']:'-1'
+                    answerId: isAnswer ? answerRes[answerIndex]['_id'] : '-1'
                 })
             })
             return { collectionList: arr, total: count }

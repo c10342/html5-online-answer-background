@@ -242,7 +242,7 @@ class UserDao extends Base {
      */
     async deleteUser({id}){
         try {
-            const result = this.User.remove({_id:id})
+            const result = this.User.deleteOne({_id:id})
             return result
         } catch (error) {
             throw error.toString()

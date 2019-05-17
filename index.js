@@ -6,18 +6,17 @@ const bodyParser = require('body-parser')
 
 const session = require('express-session')
 
-const redis = require('redis')
-
 const app = express()
 
 const {
     mongodbURI,
-    redisConf,
     sessionConf,
     errorCode,
     whiteList,
     jwtConfig
 } = require('./config')
+
+const {RedisClient} = require('./redis')
 
 const util = require('./util/index')
 
@@ -32,8 +31,6 @@ const upload = require('./router/upload')
 const statistics = require('./router/statistics')
 
 const downLoad = require('./router/downLoad')
-
-const RedisClient = redis.createClient(redisConf.port, redisConf.host)
 
 const RedisStore = require('connect-redis')(session)
 
@@ -119,7 +116,7 @@ app.use('/api', function (req, res, next) {
         if (flag) {
             next()
         } else {
-            let token = req.headers.token
+            let token = req.headers.token || ''
             // 校验token
             jwt.verify(token, jwtConfig.privateKey, function (err, decoded) {
                 if (err) {
@@ -163,6 +160,8 @@ app.use(history())
 
 // 静态资源
 app.use('/', express.static(path.join(__dirname, './dist')))
+
+app.use('/share', express.static(path.join(__dirname, './share')))
 
 // 处理全局错误
 app.use(function (err, req, res, next) {
