@@ -46,6 +46,12 @@ router.get('/cancelCollectQuestion',questions.cancelCollectQuestion)
 // 获取收藏的试题
 router.get('/getCollectQuestion',questions.getCollectQuestion)
 
+// 获取试题库
+router.get('/getItemBank',questions.getItemBank)
+
+// 添加试题库
+router.post('/addItemBank',questions.addItemBank)
+
 
 module.exports = router
 

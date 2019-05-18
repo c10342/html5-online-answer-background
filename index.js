@@ -54,7 +54,7 @@ mongoose.connect(mongodbURI, {
         useNewUrlParser: true
     })
     .then(() => {
-        console.log('connect success')
+        console.log('mongodb connect success')
     })
     .catch(error => {
         console.log(error)

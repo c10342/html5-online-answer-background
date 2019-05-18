@@ -7,8 +7,8 @@ const questionDao = new QuestionDao()
 // 添加试卷
 exports.addQuestion = async (req, res) => {
     try {
-        const { title, userName, userId, single, multiple, judgement, answer,checkList,questionType } = req.body
-        const result = await questionDao.addQuestion({questionType, checkList,title, userName, userId, single, multiple, judgement, answer })
+        const { title, userName, userId, single, multiple, judgement, answer,checkList,questionType,flag } = req.body
+        const result = await questionDao.addQuestion({questionType, checkList,title, userName, userId, single, multiple, judgement, answer,flag })
         res.json({
             statusCode: conf.successCode,
             message: '发布成功'
@@ -263,6 +263,45 @@ exports.getCollectQuestion = async (req,res) => {
                 collectionList,
                 total
             }
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+
+// 获取试题库
+exports.getItemBank = async (req,res) => {
+    try {
+        const {userId,pageSize = 10, currentPage = 1, title, beginTime, endTime,questionType} = req.query
+        const {itemList,total} = await questionDao.getItemBank({userId,pageSize , currentPage , title, beginTime, endTime,questionType})
+        res.json({
+            statusCode:conf.successCode,
+            message:'查询成功',
+            data: {
+                itemList,
+                total
+            }
+        })
+    } catch (error) {
+        res.json({
+            statusCode:conf.errorCode,
+            message:error.toString()
+        })
+    }
+}
+
+
+// 添加试题库
+exports.addItemBank = async (req,res) => {
+    try {
+        const { userId, single, multiple, judgement, answer,questionType } = req.body
+        const result = await questionDao.addItemBank({userId, single, multiple, judgement, answer,questionType})
+        res.json({
+            statusCode:conf.successCode,
+            message:'添加成功',
         })
     } catch (error) {
         res.json({

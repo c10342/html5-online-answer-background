@@ -11,6 +11,10 @@ RedisClient.on("error", function(error) {
     console.log(error);
 });
 
+RedisClient.on('connect',function(){
+    console.log('redis connect success')
+})
+
 exports.setItem = (key,val) => {
     return new Promise((resolve,reject)=>{
         RedisClient.set(key,val,(err)=>{

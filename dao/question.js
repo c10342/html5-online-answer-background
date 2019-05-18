@@ -14,6 +14,8 @@ const Mistakes = require('../models/mistake')
 
 const Collections = require('../models/collection')
 
+const ItemBank = require('../models/itemBank')
+
 class QusetionDao extends Base {
     constructor() {
         super()
@@ -24,6 +26,7 @@ class QusetionDao extends Base {
         this.Answers = Answers
         this.Mistakes = Mistakes
         this.Collections = Collections
+        this.ItemBank = ItemBank
     }
 
     /**
@@ -33,7 +36,7 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async addQuestion({ title, userName, userId, single, multiple, judgement, answer, checkList, questionType }) {
+    async addQuestion({ title, userName, userId, single, multiple, judgement, answer, checkList, questionType, flag }) {
         try {
             let obj = {
                 title,
@@ -47,9 +50,55 @@ class QusetionDao extends Base {
                 questionType
             }
             let str = JSON.stringify(obj)
-            const checked = await this.checkText(str,userId)
+            const checked = await this.checkText(str, userId)
             if (checked.spam != 0) {
                 throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+            }
+            if (!flag) {
+                // 添加单选题到试题库
+                let s = single.question
+                let ss = []
+                s.forEach(item => {
+                    ss.push({
+                        questionType,
+                        title: item.title,
+                        question: item,
+                        userId,
+                        type: 0
+                    })
+                })
+                // 添加多选题到试题库
+                let m = multiple.question
+                m.forEach(item => {
+                    ss.push({
+                        questionType,
+                        title: item.title,
+                        question: item,
+                        userId,
+                        type: 1
+                    })
+                })
+                let j = judgement.question
+                j.forEach(item => {
+                    ss.push({
+                        questionType,
+                        title: item.title,
+                        question: item,
+                        userId,
+                        type: 2
+                    })
+                })
+                let q = answer.question
+                q.forEach(item => {
+                    ss.push({
+                        questionType,
+                        title: item.title,
+                        question: item,
+                        userId,
+                        type: 3
+                    })
+                })
+                await this.ItemBank.insertMany(ss)
             }
             const question = new this.Questions(obj)
             const userRes = await this.User.findById(userId)
@@ -387,7 +436,7 @@ class QusetionDao extends Base {
                 questionType
             }
             let str = JSON.stringify(obj)
-            const checked = await this.checkText(str,userId)
+            const checked = await this.checkText(str, userId)
             if (checked.spam != 0) {
                 throw `您发表的内容包含 ${checked.message} 信息,不能发布`
             }
@@ -667,6 +716,110 @@ class QusetionDao extends Base {
                 })
             })
             return { collectionList: arr, total: count }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+
+    /**
+     * 获取试题库
+     *
+     * @param {*} { userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType }
+     * @returns
+     * @memberof QusetionDao
+     */
+    async getItemBank({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType }) {
+        try {
+            let params = {
+                ...this.getParams({
+                    title,
+                    beginTime,
+                    endTime,
+                    questionType
+                }),
+                userId
+            }
+            const collection = await this.ItemBank.find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({
+                    '_id': -1
+                })
+            const count = await this.ItemBank.countDocuments(params)
+            return { itemList: collection, total: count }
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 添加试题库
+     *
+     * @param {*} { userId, single, multiple, judgement, answer,questionType}
+     * @returns
+     * @memberof QusetionDao
+     */
+    async addItemBank({ userId, single, multiple, judgement, answer,questionType}) {
+        try {
+            let obj = {
+                userId,
+                single,
+                multiple,
+                judgement,
+                answer,
+                questionType
+            }
+            let str = JSON.stringify(obj)
+            const checked = await this.checkText(str, userId)
+            if (checked.spam != 0) {
+                throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+            }
+             // 添加单选题到试题库
+             let s = single.question
+             let ss = []
+             s.forEach(item => {
+                 ss.push({
+                     questionType,
+                     title: item.title,
+                     question: item,
+                     userId,
+                     type: 0
+                 })
+             })
+             // 添加多选题到试题库
+             let m = multiple.question
+             m.forEach(item => {
+                 ss.push({
+                     questionType,
+                     title: item.title,
+                     question: item,
+                     userId,
+                     type: 1
+                 })
+             })
+             let j = judgement.question
+             j.forEach(item => {
+                 ss.push({
+                     questionType,
+                     title: item.title,
+                     question: item,
+                     userId,
+                     type: 2
+                 })
+             })
+             let q = answer.question
+             q.forEach(item => {
+                 ss.push({
+                     questionType,
+                     title: item.title,
+                     question: item,
+                     userId,
+                     type: 3
+                 })
+             })
+             const result = await this.ItemBank.insertMany(ss)
+             return result
         } catch (error) {
             throw error.toString()
         }
