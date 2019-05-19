@@ -44,6 +44,10 @@ const questions = new Schema({
     questionType:{
         required:true,
         type:String
+    },
+    isExercises:{
+        type:Number,
+        default:0  //1是测试题
     }
 })
 

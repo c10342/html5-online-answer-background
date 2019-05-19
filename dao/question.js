@@ -47,12 +47,15 @@ class QusetionDao extends Base {
                 judgement,
                 answer,
                 checkList,
-                questionType
+                questionType,
+                isExercises:flag=='2'?1:0
             }
-            let str = JSON.stringify(obj)
-            const checked = await this.checkText(str, userId)
-            if (checked.spam != 0) {
-                throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+            if (!flag || flag == '1') {
+                let str = JSON.stringify(obj)
+                const checked = await this.checkText(str, userId)
+                if (checked.spam != 0) {
+                    throw `您发表的内容包含 ${checked.message} 信息,不能发布`
+                }
             }
             if (!flag) {
                 // 添加单选题到试题库
@@ -224,7 +227,8 @@ class QusetionDao extends Base {
                     beginTime,
                     endTime,
                     questionType
-                })
+                }),
+                isExercises:0
             }
             const count = await this.Questions.countDocuments(params)
             const result = await this.Questions.find(params)
@@ -293,13 +297,17 @@ class QusetionDao extends Base {
      * @returns 
      * @memberof QusetionDao
      */
-    async submitQuestion({ userName, userId, answer, questionId, title, answerTime, questionType }) {
+    async submitQuestion({ userName, userId, answer, questionId, title, answerTime, questionType, singles, multiples, judgements, answers, flag }) {
         try {
+            let r = null
+            if (flag == '2') {
+                r = await this.addQuestion({ title, userName, userId, single: singles, multiple: multiples, judgement: judgements, answer: answers, checkList: JSON.stringify([]), questionType, flag })
+            }
             const myAnswer = new this.Answers({
                 userName,
                 userId,
                 answer,
-                questionId,
+                questionId: questionId ? questionId : r._id,
                 title,
                 answerTime,
                 questionType
@@ -310,7 +318,6 @@ class QusetionDao extends Base {
             const item = await this.Answers.findById({
                 _id: result._id
             }).populate('questionId')
-
             // 单选题
             let single = item.questionId.single
             if (single) {
@@ -319,13 +326,15 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id] == single.answer[q.id])) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
-                        let s = new this.Mistakes({
-                            userId,
-                            types: 0,
-                            question: q,
-                            title: q.title
-                        })
-                        await s.save()
+                        if (flag != '2') {
+                            let s = new this.Mistakes({
+                                userId,
+                                types: 0,
+                                question: q,
+                                title: q.title
+                            })
+                            await s.save()
+                        }
                     }
                 })
             }
@@ -338,13 +347,15 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id].sort().toString() == multiple.answer[q.id])) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : []
-                        let s = new this.Mistakes({
-                            userId,
-                            types: 1,
-                            question: q,
-                            title: q.title
-                        })
-                        await s.save()
+                        if(flag != '2'){
+                            let s = new this.Mistakes({
+                                userId,
+                                types: 1,
+                                question: q,
+                                title: q.title
+                            })
+                            await s.save()
+                        }
                     }
                 })
             }
@@ -357,13 +368,15 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id] == judgement.answer[q.id])) {
                         q.message = q.answer == 'A' ? '对' : '错'
                         q.answer = item.answer[q.id] == 'A' ? '对' : '错'
-                        let s = new this.Mistakes({
-                            userId,
-                            types: 2,
-                            question: q,
-                            title: q.title
-                        })
-                        await s.save()
+                        if(flag !=2){
+                            let s = new this.Mistakes({
+                                userId,
+                                types: 2,
+                                question: q,
+                                title: q.title
+                            })
+                            await s.save()
+                        }
                     }
                 })
             }
@@ -375,13 +388,15 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && this.util.strSimilarity2Percent(item.answer[q.id], answer1.answer[q.id]) > 0.5)) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
-                        let s = new this.Mistakes({
-                            userId,
-                            types: 3,
-                            question: q,
-                            title: q.title
-                        })
-                        await s.save()
+                        if(flag !='2'){
+                            let s = new this.Mistakes({
+                                userId,
+                                types: 3,
+                                question: q,
+                                title: q.title
+                            })
+                            await s.save()
+                        }
                     }
                 })
             }
@@ -760,7 +775,7 @@ class QusetionDao extends Base {
      * @returns
      * @memberof QusetionDao
      */
-    async addItemBank({ userId, single, multiple, judgement, answer,questionType}) {
+    async addItemBank({ userId, single, multiple, judgement, answer, questionType }) {
         try {
             let obj = {
                 userId,
@@ -775,54 +790,155 @@ class QusetionDao extends Base {
             if (checked.spam != 0) {
                 throw `您发表的内容包含 ${checked.message} 信息,不能发布`
             }
-             // 添加单选题到试题库
-             let s = single.question
-             let ss = []
-             s.forEach(item => {
-                 ss.push({
-                     questionType,
-                     title: item.title,
-                     question: item,
-                     userId,
-                     type: 0
-                 })
-             })
-             // 添加多选题到试题库
-             let m = multiple.question
-             m.forEach(item => {
-                 ss.push({
-                     questionType,
-                     title: item.title,
-                     question: item,
-                     userId,
-                     type: 1
-                 })
-             })
-             let j = judgement.question
-             j.forEach(item => {
-                 ss.push({
-                     questionType,
-                     title: item.title,
-                     question: item,
-                     userId,
-                     type: 2
-                 })
-             })
-             let q = answer.question
-             q.forEach(item => {
-                 ss.push({
-                     questionType,
-                     title: item.title,
-                     question: item,
-                     userId,
-                     type: 3
-                 })
-             })
-             const result = await this.ItemBank.insertMany(ss)
-             return result
+            // 添加单选题到试题库
+            let s = single.question
+            let ss = []
+            s.forEach(item => {
+                ss.push({
+                    questionType,
+                    title: item.title,
+                    question: item,
+                    userId,
+                    type: 0
+                })
+            })
+            // 添加多选题到试题库
+            let m = multiple.question
+            m.forEach(item => {
+                ss.push({
+                    questionType,
+                    title: item.title,
+                    question: item,
+                    userId,
+                    type: 1
+                })
+            })
+            let j = judgement.question
+            j.forEach(item => {
+                ss.push({
+                    questionType,
+                    title: item.title,
+                    question: item,
+                    userId,
+                    type: 2
+                })
+            })
+            let q = answer.question
+            q.forEach(item => {
+                ss.push({
+                    questionType,
+                    title: item.title,
+                    question: item,
+                    userId,
+                    type: 3
+                })
+            })
+            const result = await this.ItemBank.insertMany(ss)
+            return result
         } catch (error) {
             throw error.toString()
         }
+    }
+
+    /**
+     * 生成练习题
+     *
+     * @param {*} { userId, singleCount, multipleCount, judgementCount, answerCount, questionType }
+     * @returns
+     * @memberof QusetionDao
+     */
+    async createExercises({ userId, singleCount, multipleCount, judgementCount, answerCount, questionType }) {
+        try {
+            let params = { userId, questionType }
+            let questions = await this.ItemBank.find(params)
+            let result = this.handelExercises(questions, singleCount, multipleCount, judgementCount, answerCount)
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+
+    /**
+     * 删除试题
+     *
+     * @param {*} { id }
+     * @returns
+     * @memberof QusetionDao
+     */
+    async deleteBank({ id }) {
+        try {
+            let result = await this.ItemBank.deleteOne({_id:id})
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 处理练习题
+     *
+     * @param {*} questions
+     * @param {*} singleCount
+     * @param {*} multipleCount
+     * @param {*} judgementCount
+     * @param {*} answerCount
+     * @returns
+     * @memberof QusetionDao
+     */
+    handelExercises(questions, singleCount, multipleCount, judgementCount, answerCount) {
+        let obj = {
+            single: [],
+            multiple: [],
+            judgement: [],
+            answer: []
+        }
+        questions.forEach(item => {
+            let question = item.question
+            let type = item.type
+            if (type == 0) {
+                obj.single.push({
+                    ...question,
+                    a:question.answer,
+                    answer: ''
+                })
+            } else if (type == 1) {
+                obj.multiple.push({
+                    ...question,
+                    a:question.answer,
+                    answer: []
+                })
+            } else if (type == 2) {
+                obj.judgement.push({
+                    ...question,
+                    a:question.answer,
+                    answer: ''
+                })
+            } else if (type == 3) {
+                obj.answer.push({
+                    ...question,
+                    a:question.answer,
+                    answer: ''
+                })
+            }
+        })
+        if (obj.single.length > singleCount) {
+            let s = this.util.shuffle(obj.single)
+            obj.single = s.slice(0, singleCount)
+        }
+        if (obj.multiple.length > multipleCount) {
+            let s = this.util.shuffle(obj.multiple)
+            obj.multiple = s.slice(0, multipleCount)
+        }
+        if (obj.judgement.length > judgementCount) {
+            let s = this.util.shuffle(obj.judgement)
+            obj.judgement = s.slice(0, judgementCount)
+        }
+        if (obj.answer.length > answerCount) {
+            let s = this.util.shuffle(obj.answer)
+            obj.answer = s.slice(0, answerCount)
+        }
+        return obj
     }
 
 }

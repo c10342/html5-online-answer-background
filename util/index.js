@@ -67,9 +67,9 @@ exports.get = (url, params = {}, headers = {}) => {
 }
 
 // post请求
-exports.post = (url, params = {},config={}) => {
+exports.post = (url, params = {}, config = {}) => {
     return new Promise((resolve, reject) => {
-        axios.post(url, params,config).then(res => {
+        axios.post(url, params, config).then(res => {
             if (res.status == 200) {
                 resolve(res.data)
             } else {
@@ -82,7 +82,7 @@ exports.post = (url, params = {},config={}) => {
 }
 
 // 产生4位随机数
-exports.getCode = (min=1000,max = 10000) => {
+exports.getCode = (min = 1000, max = 10000) => {
     let code = Math.floor(Math.random() * (max - min + 1) + min)
     return code
 }
@@ -93,6 +93,26 @@ exports.getRandomStr = () => {
 }
 
 // 生成token
-exports.createToken = (info,key,opt) => {
-    return jwt.sign({_id:info._id,name:info.name,email:info.email,createTime:info.createTime,password:info.password},key,opt)
+exports.createToken = (info, key, opt) => {
+    return jwt.sign({ _id: info._id, name: info.name, email: info.email, createTime: info.createTime, password: info.password }, key, opt)
+}
+
+// 在min和max之间的数中取一个随机数
+function getRandomInt(min, max) {
+    // max-min+1是为了能去到上限max，0<Math.random<1
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+
+// 打乱数组
+exports.shuffle = (arr) => {
+    // 复制一个新数组
+    var _arr = arr.slice()
+    for (var i = 0; i < _arr.length; i++) {
+        var j = getRandomInt(0, i);
+        var t = _arr[i];
+        _arr[i] = _arr[j];
+        _arr[j] = t;
+    }
+    return _arr;
 }

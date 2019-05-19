@@ -49,8 +49,14 @@ router.get('/getCollectQuestion',questions.getCollectQuestion)
 // 获取试题库
 router.get('/getItemBank',questions.getItemBank)
 
+// 删除试题
+router.get('/deleteBank',questions.deleteBank)
+
 // 添加试题库
 router.post('/addItemBank',questions.addItemBank)
+
+// 生成练习题
+router.get('/createExercises',questions.createExercises)
 
 
 module.exports = router
