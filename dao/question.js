@@ -67,7 +67,8 @@ class QusetionDao extends Base {
                         title: item.title,
                         question: item,
                         userId,
-                        type: 0
+                        type: 0,
+                        checkList
                     })
                 })
                 // 添加多选题到试题库
@@ -78,7 +79,8 @@ class QusetionDao extends Base {
                         title: item.title,
                         question: item,
                         userId,
-                        type: 1
+                        type: 1,
+                        checkList
                     })
                 })
                 let j = judgement.question
@@ -88,7 +90,8 @@ class QusetionDao extends Base {
                         title: item.title,
                         question: item,
                         userId,
-                        type: 2
+                        type: 2,
+                        checkList
                     })
                 })
                 let q = answer.question
@@ -98,7 +101,8 @@ class QusetionDao extends Base {
                         title: item.title,
                         question: item,
                         userId,
-                        type: 3
+                        type: 3,
+                        checkList
                     })
                 })
                 await this.ItemBank.insertMany(ss)
@@ -326,12 +330,18 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id] == single.answer[q.id])) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
-                        if (flag != '2') {
+                        let h = await this.Mistakes.findOne({questionId:q.id})
+                        if(h){
+                            await this.Mistakes.where({_id:h._id}).updateOne({
+                                count:h.count+1,
+                            })
+                        }else{
                             let s = new this.Mistakes({
                                 userId,
                                 types: 0,
                                 question: q,
-                                title: q.title
+                                title: q.title,
+                                questionId:q.id
                             })
                             await s.save()
                         }
@@ -347,12 +357,18 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id].sort().toString() == multiple.answer[q.id])) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : []
-                        if(flag != '2'){
+                        let h = await this.Mistakes.findOne({questionId:q.id})
+                        if(h){
+                            await this.Mistakes.where({_id:h._id}).updateOne({
+                                count:h.count+1
+                            })
+                        }else{
                             let s = new this.Mistakes({
                                 userId,
                                 types: 1,
                                 question: q,
-                                title: q.title
+                                title: q.title,
+                                questionId:q.id
                             })
                             await s.save()
                         }
@@ -368,12 +384,18 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && item.answer[q.id] == judgement.answer[q.id])) {
                         q.message = q.answer == 'A' ? '对' : '错'
                         q.answer = item.answer[q.id] == 'A' ? '对' : '错'
-                        if(flag !=2){
+                        let h = await this.Mistakes.findOne({questionId:q.id})
+                        if(h){
+                            await this.Mistakes.where({_id:h._id}).updateOne({
+                                count:h.count+1,
+                            })
+                        }else{
                             let s = new this.Mistakes({
                                 userId,
                                 types: 2,
                                 question: q,
-                                title: q.title
+                                title: q.title,
+                                questionId:q.id
                             })
                             await s.save()
                         }
@@ -388,12 +410,18 @@ class QusetionDao extends Base {
                     if (!(item.answer[q.id] && this.util.strSimilarity2Percent(item.answer[q.id], answer1.answer[q.id]) > 0.5)) {
                         q.message = q.answer
                         q.answer = item.answer[q.id] ? item.answer[q.id] : ''
-                        if(flag !='2'){
+                        let h = await this.Mistakes.findOne({questionId:q.id})
+                        if(h){
+                            await this.Mistakes.where({_id:h._id}).updateOne({
+                                count:h.count+1
+                            })
+                        }else{
                             let s = new this.Mistakes({
                                 userId,
                                 types: 3,
                                 question: q,
-                                title: q.title
+                                title: q.title,
+                                questionId:q.id
                             })
                             await s.save()
                         }
@@ -744,16 +772,19 @@ class QusetionDao extends Base {
      * @returns
      * @memberof QusetionDao
      */
-    async getItemBank({ userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType }) {
+    async getItemBank({ checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType }) {
         try {
             let params = {
                 ...this.getParams({
                     title,
                     beginTime,
                     endTime,
-                    questionType
+                    questionType,
+                    checkList
                 }),
-                userId
+                $or:[{userId},{checkList:new RegExp(checkList)}]
+                // $group:{userId,checkList:new RegExp(checkList)},
+                // userId:{$or:new RegExp(userId)}
             }
             const collection = await this.ItemBank.find(params)
                 .skip(pageSize * (currentPage - 1))
@@ -775,7 +806,7 @@ class QusetionDao extends Base {
      * @returns
      * @memberof QusetionDao
      */
-    async addItemBank({ userId, single, multiple, judgement, answer, questionType }) {
+    async addItemBank({ checkList,userId, single, multiple, judgement, answer, questionType }) {
         try {
             let obj = {
                 userId,
@@ -783,7 +814,8 @@ class QusetionDao extends Base {
                 multiple,
                 judgement,
                 answer,
-                questionType
+                questionType,
+                checkList
             }
             let str = JSON.stringify(obj)
             const checked = await this.checkText(str, userId)
@@ -799,7 +831,7 @@ class QusetionDao extends Base {
                     title: item.title,
                     question: item,
                     userId,
-                    type: 0
+                    type: 0,checkList
                 })
             })
             // 添加多选题到试题库
@@ -810,7 +842,7 @@ class QusetionDao extends Base {
                     title: item.title,
                     question: item,
                     userId,
-                    type: 1
+                    type: 1,checkList
                 })
             })
             let j = judgement.question
@@ -820,7 +852,7 @@ class QusetionDao extends Base {
                     title: item.title,
                     question: item,
                     userId,
-                    type: 2
+                    type: 2,checkList
                 })
             })
             let q = answer.question
@@ -830,7 +862,7 @@ class QusetionDao extends Base {
                     title: item.title,
                     question: item,
                     userId,
-                    type: 3
+                    type: 3,checkList
                 })
             })
             const result = await this.ItemBank.insertMany(ss)
@@ -876,6 +908,38 @@ class QusetionDao extends Base {
     }
 
     /**
+     * 编辑试题
+     * 
+     * @param {any} { question } 
+     * @returns 
+     * @memberof QusetionDao
+     */
+    async editBank({ question }) {
+        try {
+            let result = await this.ItemBank.where({_id:question._id}).updateOne(question)
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 删除错题
+     * 
+     * @param {any} { id } 
+     * @returns 
+     * @memberof QusetionDao
+     */
+    async deleteMistake({ id }) {
+        try {
+            let result = await this.Mistakes.deleteOne({_id:id})
+            return result
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
      * 处理练习题
      *
      * @param {*} questions
@@ -897,29 +961,13 @@ class QusetionDao extends Base {
             let question = item.question
             let type = item.type
             if (type == 0) {
-                obj.single.push({
-                    ...question,
-                    a:question.answer,
-                    answer: ''
-                })
+                obj.single.push(Object.assign({},question,{a:question.answer,answer:''}))
             } else if (type == 1) {
-                obj.multiple.push({
-                    ...question,
-                    a:question.answer,
-                    answer: []
-                })
+                obj.multiple.push(Object.assign({},question,{a:question.answer,answer:[]}))
             } else if (type == 2) {
-                obj.judgement.push({
-                    ...question,
-                    a:question.answer,
-                    answer: ''
-                })
+                obj.judgement.push(Object.assign({},question,{a:question.answer,answer:''}))
             } else if (type == 3) {
-                obj.answer.push({
-                    ...question,
-                    a:question.answer,
-                    answer: ''
-                })
+                obj.answer.push(Object.assign({},question,{a:question.answer,answer:''}))
             }
         })
         if (obj.single.length > singleCount) {

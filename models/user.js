@@ -28,7 +28,7 @@ const user = new Schema({
     identity:{
         type:String,
         // 0管理员，1小学生，2初中生，3高中生，4大学生，5教师，6游客，7其他
-        required:true
+        default:'游客'
     },
     jurisdiction:{
         type:Array,

@@ -52,11 +52,17 @@ router.get('/getItemBank',questions.getItemBank)
 // 删除试题
 router.get('/deleteBank',questions.deleteBank)
 
+// 编辑试题
+router.post('/editBank',questions.editBank)
+
 // 添加试题库
 router.post('/addItemBank',questions.addItemBank)
 
 // 生成练习题
 router.get('/createExercises',questions.createExercises)
+
+// 删除错题
+router.get('/deleteMistake',questions.deleteMistake)
 
 
 module.exports = router

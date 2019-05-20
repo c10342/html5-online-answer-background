@@ -26,7 +26,11 @@ const itemBanks = new Schema({
     userId:{
         type:String,
         required:true
-    }
+    },
+    checkList:{
+        required:true,
+        type:String,
+    },
 })
 
 module.exports = ItemBanks = moogose.model('itemBanks',itemBanks)

@@ -278,8 +278,8 @@ exports.getCollectQuestion = async (req, res) => {
 // 获取试题库
 exports.getItemBank = async (req, res) => {
     try {
-        const { userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType } = req.query
-        const { itemList, total } = await questionDao.getItemBank({ userId, pageSize, currentPage, title, beginTime, endTime, questionType })
+        const { checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType } = req.query
+        const { itemList, total } = await questionDao.getItemBank({ checkList,userId, pageSize, currentPage, title, beginTime, endTime, questionType })
         res.json({
             statusCode: conf.successCode,
             message: '查询成功',
@@ -300,8 +300,8 @@ exports.getItemBank = async (req, res) => {
 // 添加试题库
 exports.addItemBank = async (req, res) => {
     try {
-        const { userId, single, multiple, judgement, answer, questionType } = req.body
-        const result = await questionDao.addItemBank({ userId, single, multiple, judgement, answer, questionType })
+        const { checkList,userId, single, multiple, judgement, answer, questionType } = req.body
+        const result = await questionDao.addItemBank({ checkList,userId, single, multiple, judgement, answer, questionType })
         res.json({
             statusCode: conf.successCode,
             message: '添加成功',
@@ -343,6 +343,41 @@ exports.deleteBank = async (req, res) => {
         res.json({
             statusCode: conf.successCode,
             message: '添加成功',
+        })
+    } catch (error) {
+        res.json({
+            statusCode: conf.errorCode,
+            message: error.toString()
+        })
+    }
+}
+
+// 删除试题
+exports.editBank = async (req, res) => {
+    try {
+        const { question } = req.body
+        const result = await questionDao.editBank({ question })
+        res.json({
+            statusCode: conf.successCode,
+            message: '修改成功',
+        })
+    } catch (error) {
+        res.json({
+            statusCode: conf.errorCode,
+            message: error.toString()
+        })
+    }
+}
+
+
+// 删除错题
+exports.deleteMistake = async (req, res) => {
+    try {
+        const { id } = req.query
+        const result = await questionDao.deleteMistake({ id })
+        res.json({
+            statusCode: conf.successCode,
+            message: '删除成功',
         })
     } catch (error) {
         res.json({
