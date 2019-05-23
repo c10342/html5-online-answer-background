@@ -42,6 +42,8 @@ const history = require('connect-history-api-fallback')
 
 const jwt = require('jsonwebtoken')
 
+const cors = require('cors')
+
 // 请求日志插件
 const logger = require('morgan')
 // 用于分割日志
@@ -60,6 +62,9 @@ mongoose.connect(mongodbURI, {
         console.log(error)
     })
 
+// 设置跨域
+app.use(cors())
+
 // 请求日志相关
 const logDirectory = path.join(__dirname, './log')
 // 判断log目录是否存在，不存在就创建
@@ -71,12 +76,14 @@ const accessLogStream = FileStreamRotator.getStream({
     frequency: 'daily',
     verbose: false
 })
+
 app.use(logger('dev', {
     skip: function (req, res) {
         // 状态码小于400的日志不会打印在控制台，即出现错误才会打印在控制台
         return res.statusCode < 400
     },
 }));
+
 // 把请求日志写入文件
 app.use(logger('common', {
     stream: accessLogStream
@@ -86,6 +93,7 @@ app.use(logger('common', {
 app.use(bodyParser.urlencoded({
     extended: false
 }))
+
 app.use(bodyParser.json())
 
 // 使用redis持久化session
