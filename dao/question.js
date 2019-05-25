@@ -879,9 +879,9 @@ class QusetionDao extends Base {
      * @returns
      * @memberof QusetionDao
      */
-    async createExercises({ userId, singleCount, multipleCount, judgementCount, answerCount, questionType }) {
+    async createExercises({ checkList,userId, singleCount, multipleCount, judgementCount, answerCount, questionType }) {
         try {
-            let params = { userId, questionType }
+            let params = { questionType,$or:[{userId},{checkList:new RegExp(checkList)}] }
             let questions = await this.ItemBank.find(params)
             let result = this.handelExercises(questions, singleCount, multipleCount, judgementCount, answerCount)
             return result

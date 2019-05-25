@@ -317,8 +317,8 @@ exports.addItemBank = async (req, res) => {
 // 生成练习题
 exports.createExercises = async (req, res) => {
     try {
-        const { userId, singleCount, multipleCount, judgementCount, answerCount, questionType } = req.query
-        const result = await questionDao.createExercises({ userId, singleCount, multipleCount, judgementCount, answerCount, questionType })
+        const { checkList,userId, singleCount, multipleCount, judgementCount, answerCount, questionType } = req.query
+        const result = await questionDao.createExercises({ checkList,userId, singleCount, multipleCount, judgementCount, answerCount, questionType })
         res.json({
             statusCode: conf.successCode,
             message: '添加成功',
