@@ -21,14 +21,15 @@ class StatisticsDao extends Base {
      * @returns 
      * @memberof StatisticsDao
      */
-    async statisticsQuestions({ userId, pageSize = 10, currentPage = 1, title, endTime, beginTime }) {
+    async statisticsQuestions({ questionType,userId, pageSize = 10, currentPage = 1, title, endTime, beginTime }) {
         try {
             let params = {
                 userId,
                 ...this.getParams({
                     title,
                     endTime,
-                    beginTime
+                    beginTime,
+                    questionType
                 })
             }
             let qResult = await this.Questions.find(params)
@@ -306,14 +307,15 @@ class StatisticsDao extends Base {
      * @returns 
      * @memberof StatisticsDao
      */
-    async getAnswerUserById({ id, pageSize = 10, currentPage = 1, userName, beginTime, endTime }) {
+    async getAnswerUserById({ questionType,id, pageSize = 10, currentPage = 1, userName, beginTime, endTime }) {
         try {
             let params = {
                 questionId: id,
                 ...this.getParams({
                     userName,
                     beginTime,
-                    endTime
+                    endTime,
+                    questionType
                 })
             }
             //子表关联主表查询，populate里面为子表外键

@@ -220,9 +220,9 @@ class UserDao extends Base {
      * @returns
      * @memberof UserDao
      */
-    async getUserList({ email,id, pageSize = 10, currentPage = 1, name, beginTime, endTime }) {
+    async getUserList({ identity,email,id, pageSize = 10, currentPage = 1, name, beginTime, endTime }) {
         try {
-            let params = { _id: { '$ne': id }, ...this.getParams({email, name, beginTime, endTime }) }
+            let params = { _id: { '$ne': id }, ...this.getParams({email, name, beginTime, endTime,identity }) }
             const userList = await this.User.find(params)
                 .skip(pageSize * (currentPage - 1))
                 .limit(parseInt(pageSize))

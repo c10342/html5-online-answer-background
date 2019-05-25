@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 
 const bodyParser = require('body-parser')
 
+const cookieparser=require('cookie-parser');
+
 const session = require('express-session')
 
 const app = express()
@@ -89,6 +91,9 @@ app.use(logger('common', {
     stream: accessLogStream
 }))
 
+// 处理cookie
+app.use(cookieparser());
+
 // 处理post请求数据
 app.use(bodyParser.urlencoded({
     extended: false
@@ -119,6 +124,10 @@ app.use(FileUpload());
 // 检查是否已经登录,以及校验token
 app.use('/api', function (req, res, next) {
     try {
+        if(req.cookies.userInfo){
+            next()
+            return;
+        }
         let url = req.url
         let flag = whiteList.some(item => url.startsWith(item))
         if (flag) {

@@ -7,8 +7,8 @@ const statisticsDao = new StatisticsDao()
 // 统计用户发布的所有试题
 exports.statisticsQuestions = async (req, res) => {
     try {
-        const { userId, pageSize = 10, currentPage = 1, title, endTime, beginTime } = req.query
-        const { list, total } = await statisticsDao.statisticsQuestions({ userId, pageSize, currentPage, title, endTime, beginTime })
+        const { questionType,userId, pageSize = 10, currentPage = 1, title, endTime, beginTime } = req.query
+        const { list, total } = await statisticsDao.statisticsQuestions({ userId, pageSize, currentPage, title, endTime, beginTime,questionType })
         res.json({
             statusCode: conf.successCode,
             data: {
@@ -49,8 +49,8 @@ exports.statisticsQuestionsById = async (req, res) => {
 exports.getAnswerUserById = async (req, res) => {
     try {
         const { id } = req.params
-        const { userName, beginTime, endTime, pageSize = 10, currentPage = 1 } = req.query
-        const { answerList, total } = await statisticsDao.getAnswerUserById({ id, userName, beginTime, endTime, pageSize, currentPage })
+        const { questionType,userName, beginTime, endTime, pageSize = 10, currentPage = 1 } = req.query
+        const { answerList, total } = await statisticsDao.getAnswerUserById({ id, userName, beginTime, endTime, pageSize, currentPage,questionType })
         res.json({
             statusCode: conf.successCode,
             message: '查询成功',

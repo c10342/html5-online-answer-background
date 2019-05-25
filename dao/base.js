@@ -22,7 +22,7 @@ class Base {
      * @returns 
      * @memberof Base
      */
-    getParams({ email, title, beginTime, endTime, userName, content, name, checkList, questionType }) {
+    getParams({ email, title, beginTime, endTime, userName, content, name, checkList, questionType,identity }) {
         let params = {}
         if (title) {
             // 模糊查询
@@ -45,6 +45,9 @@ class Base {
         }
         if (questionType) {
             params.questionType = new RegExp(questionType)
+        }
+        if(identity){
+            params.identity = new RegExp(identity)
         }
         if (beginTime) {
             if (params.createTime) {

@@ -248,13 +248,13 @@ exports.getGithubInfo = async (req, res) => {
 exports.getUserList = async (req, res) => {
     try {
         const {
-            id, pageSize, currentPage, name, beginTime, endTime
+            id, pageSize, currentPage, name, beginTime, endTime,identity
         } = req.query
 
         const {
             userList, total
         } = await userDao.getUserList({
-            id, pageSize, currentPage, name, beginTime, endTime
+            id, pageSize, currentPage, name, beginTime, endTime,identity
         })
 
         res.json({

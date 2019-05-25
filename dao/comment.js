@@ -42,9 +42,9 @@ class CommentDao extends Base {
      * @returns 
      * @memberof CommentDao
      */
-    async getCommentList({ questionId, pageSize = 10, currentPage = 1, userName, beginTime, endTime, content }) {
+    async getCommentList({ questionId, pageSize = 10, currentPage = 1, userName, beginTime, endTime, content,questionType }) {
         try {
-            let params = { questionId, ...this.getParams({ userName, content, beginTime, endTime }) }
+            let params = { questionId, ...this.getParams({ userName, content, beginTime, endTime,questionType }) }
             const result = await this.Comments.find(params)
                 .skip(pageSize * (currentPage - 1))
                 .limit(parseInt(pageSize))
@@ -72,9 +72,9 @@ class CommentDao extends Base {
      * @returns 
      * @memberof CommentDao
      */
-    async getUserComment({ userId, pageSize=10, currentPage=1, beginTime, endTime, content }) {
+    async getUserComment({ title,userId, pageSize=10, currentPage=1, beginTime, endTime, content }) {
         try {
-            let params = { userId, ...this.getParams({ content, beginTime, endTime }) }
+            let params = { userId, ...this.getParams({ title,content, beginTime, endTime }) }
             const result = await this.Comments.find(params)
                 .skip(pageSize * (currentPage - 1))
                 .limit(parseInt(pageSize))
@@ -86,7 +86,8 @@ class CommentDao extends Base {
                     userName: item.userName,
                     content: item.content,
                     createTime: item.createTime,
-                    title:item.title
+                    title:item.title,
+                    questionType:item.questionType
                 })
             });
             return {commentList: arr,total}

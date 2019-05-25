@@ -25,8 +25,8 @@ exports.submitComment = async (req, res) => {
 exports.getCommentList = async (req, res) => {
     try {
         let { id } = req.params
-        let { pageSize = 10, currentPage = 1, userName, beginTime, endTime, content } = req.query
-        const { commentList, total } = await commentDao.getCommentList({ questionId: id, pageSize, currentPage, userName, beginTime, endTime, content })
+        let { pageSize = 10, currentPage = 1, userName, beginTime, endTime, content,questionType } = req.query
+        const { commentList, total } = await commentDao.getCommentList({ questionId: id, pageSize,questionType, currentPage, userName, beginTime, endTime, content })
         res.json({
             statusCode: conf.successCode,
             message: '查询成功',
@@ -47,8 +47,8 @@ exports.getCommentList = async (req, res) => {
 // 获取用户评论列表
 exports.getUserComment = async (req, res) => {
     try {
-        let { pageSize = 10, currentPage = 1, beginTime, endTime, content,id } = req.query
-        const { commentList, total } = await commentDao.getUserComment({ userId: id, pageSize, currentPage, beginTime, endTime, content })
+        let { title,pageSize = 10, currentPage = 1, beginTime, endTime, content,id } = req.query
+        const { commentList, total } = await commentDao.getUserComment({ userId: id, pageSize, currentPage, beginTime,endTime, content,title })
         res.json({
             statusCode: conf.successCode,
             message: '查询成功',
