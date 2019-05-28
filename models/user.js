@@ -11,7 +11,7 @@ const user = new Schema({
     },
     githubId:{
         type:Number,
-        default:getCode(1000,100000)
+        default:1
     },
     email:{
         required:true,

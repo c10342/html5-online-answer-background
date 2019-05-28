@@ -278,8 +278,8 @@ exports.getCollectQuestion = async (req, res) => {
 // 获取试题库
 exports.getItemBank = async (req, res) => {
     try {
-        const { checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType } = req.query
-        const { itemList, total } = await questionDao.getItemBank({ checkList,userId, pageSize, currentPage, title, beginTime, endTime, questionType })
+        const { checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType,type } = req.query
+        const { itemList, total } = await questionDao.getItemBank({ checkList,userId, pageSize, currentPage, title, beginTime, endTime, questionType,type })
         res.json({
             statusCode: conf.successCode,
             message: '查询成功',

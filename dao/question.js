@@ -772,7 +772,7 @@ class QusetionDao extends Base {
      * @returns
      * @memberof QusetionDao
      */
-    async getItemBank({ checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType }) {
+    async getItemBank({ checkList,userId, pageSize = 10, currentPage = 1, title, beginTime, endTime, questionType,type }) {
         try {
             let params = {
                 ...this.getParams({
@@ -780,7 +780,7 @@ class QusetionDao extends Base {
                     beginTime,
                     endTime,
                     questionType,
-                    checkList
+                    type
                 }),
                 $or:[{userId},{checkList:new RegExp(checkList)}]
                 // $group:{userId,checkList:new RegExp(checkList)},
@@ -881,7 +881,10 @@ class QusetionDao extends Base {
      */
     async createExercises({ checkList,userId, singleCount, multipleCount, judgementCount, answerCount, questionType }) {
         try {
-            let params = { questionType,$or:[{userId},{checkList:new RegExp(checkList)}] }
+            let params = { $or:[{userId},{checkList:new RegExp(checkList)}] }
+            if(questionType){
+                params.questionType = questionType
+            }
             let questions = await this.ItemBank.find(params)
             let result = this.handelExercises(questions, singleCount, multipleCount, judgementCount, answerCount)
             return result
