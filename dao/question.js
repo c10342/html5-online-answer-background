@@ -883,7 +883,7 @@ class QusetionDao extends Base {
         try {
             let params = { $or:[{userId},{checkList:new RegExp(checkList)}] }
             if(questionType){
-                params.questionType = questionType
+                params.questionType = new RegExp(questionType)
             }
             let questions = await this.ItemBank.find(params)
             let result = this.handelExercises(questions, singleCount, multipleCount, judgementCount, answerCount)

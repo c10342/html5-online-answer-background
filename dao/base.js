@@ -194,6 +194,9 @@ class Base {
      */
     async checkText(text,userId) {
         try {
+            if(text.length > 1900){
+                text = text.substr(0,1900)
+            }
             const accessToken = await this.getBaiDuAccessToken()
             const result = await this.util.post(`${this.config.baiduApi.requestUrl}?access_token=${accessToken}&content=${encodeURIComponent(text)}`,
             {},

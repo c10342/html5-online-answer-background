@@ -40,10 +40,6 @@ self.__precacheManifest = [
     "url": "/assets/img/logo.c43f32ce.png"
   },
   {
-    "revision": "4b5a84aaf1c9485e060c503a0ff8cadb",
-    "url": "/assets/fonts/fontawesome-webfont.4b5a84aa.woff2"
-  },
-  {
     "revision": "45c73723862c6fc5eb3d6961db2d71fb",
     "url": "/assets/fonts/fontawesome-webfont.45c73723.eot"
   },
@@ -52,15 +48,19 @@ self.__precacheManifest = [
     "url": "/assets/fonts/fontawesome-webfont.dfb02f8f.woff"
   },
   {
-    "revision": "4f47f5af2d5afc906cf7",
-    "url": "/assets/js/app.425b4c69.js"
+    "revision": "4b5a84aaf1c9485e060c503a0ff8cadb",
+    "url": "/assets/fonts/fontawesome-webfont.4b5a84aa.woff2"
+  },
+  {
+    "revision": "980580b6816afb93b2ab",
+    "url": "/assets/js/app.faf1dcc8.js"
   },
   {
     "revision": "67afff0e5c9176350644",
     "url": "/assets/js/chunk-vendors.173c86f1.js"
   },
   {
-    "revision": "0d005be77af2018d4060b45dc37040f8",
+    "revision": "b87a4db80b6677dd61001c474b28aa38",
     "url": "/index.html"
   },
   {
@@ -100,7 +100,7 @@ self.__precacheManifest = [
     "url": "/fonts/FontAwesome.otf"
   },
   {
-    "revision": "4f47f5af2d5afc906cf7",
-    "url": "/assets/css/app.4ac6e729.css"
+    "revision": "980580b6816afb93b2ab",
+    "url": "/assets/css/app.b27583a8.css"
   }
 ];
