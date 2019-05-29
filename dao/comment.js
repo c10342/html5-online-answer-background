@@ -4,6 +4,8 @@ const Comments = require('../models/comment')
 
 const Answer = require('../models/answer')
 
+const Reply = require('../models/reply')
+
 const Xss = require('xss')
 
 class CommentDao extends Base {
@@ -12,6 +14,7 @@ class CommentDao extends Base {
         this.Comments = Comments
         this.Answer = Answer
         this.Xss = Xss
+        this.Reply = Reply
     }
 
     /**
@@ -55,7 +58,9 @@ class CommentDao extends Base {
                 arr.push({
                     userName: item.userName,
                     content: item.content,
-                    createTime: item.createTime
+                    createTime: item.createTime,
+                    userId:item.userId,
+                    _id:item._id
                 })
             });
             return {commentList: arr,total}
@@ -66,10 +71,26 @@ class CommentDao extends Base {
 
 
     /**
-     * 获取用户评论列表
+     * 回复用户评论
      * 
      * @param {any} { userId, pageSize=10, currentPage=1, beginTime, endTime, content } 
      * @returns 
+     * @memberof CommentDao
+     */
+    async submitReply({ userName,commentId, userId, replyId, content}) {
+        try {
+            const r = new this.Reply({userName,commentId, userId, replyId, content})
+            return await r.save()
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 获取用户评论列表
+     *
+     * @param {*} { title,userId, pageSize=10, currentPage=1, beginTime, endTime, content }
+     * @returns
      * @memberof CommentDao
      */
     async getUserComment({ title,userId, pageSize=10, currentPage=1, beginTime, endTime, content }) {
@@ -87,10 +108,40 @@ class CommentDao extends Base {
                     content: item.content,
                     createTime: item.createTime,
                     title:item.title,
-                    questionType:item.questionType
+                    questionType:item.questionType,
+                    _id:item._id
                 })
             });
             return {commentList: arr,total}
+        } catch (error) {
+            throw error.toString()
+        }
+    }
+
+    /**
+     * 获取回复列表
+     *
+     * @param {*} { pageSize = 10, currentPage = 1, beginTime, endTime, content,commentId }
+     * @returns
+     * @memberof CommentDao
+     */
+    async getReplyList({ pageSize = 10, currentPage = 1, beginTime, endTime, content,commentId }) {
+        try {
+            let params = { commentId, ...this.getParams({ content, beginTime, endTime }) }
+            const result = await this.Reply.find(params)
+                .skip(pageSize * (currentPage - 1))
+                .limit(parseInt(pageSize))
+                .sort({ '_id': -1 })
+            const total = await this.Reply.countDocuments(params)
+            let arr = []
+            result.forEach(item => {
+                arr.push({
+                    userName: item.userName,
+                    content: item.content,
+                    createTime: item.createTime,
+                })
+            });
+            return {replyList: arr,total}
         } catch (error) {
             throw error.toString()
         }

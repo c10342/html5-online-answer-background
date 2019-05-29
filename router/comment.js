@@ -11,7 +11,13 @@ router.post('/submitComment',comment.submitComment)
 router.get('/getCommentList/:id',comment.getCommentList)
 
 // 获取用户发表评论
-router.get('/getUserComment/',comment.getUserComment)
+router.get('/getUserComment',comment.getUserComment)
+
+// 回复用户评论
+router.post('/submitReply',comment.submitReply)
+
+// 获取回复列表
+router.get('/getReplyList',comment.getReplyList)
 
 
 

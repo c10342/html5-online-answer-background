@@ -64,3 +64,38 @@ exports.getUserComment = async (req, res) => {
         })
     }
 }
+
+// 回复用户评论
+exports.submitReply = async (req, res) => {
+    try {
+        let { userName,commentId, userId, replyId, content } = req.body
+        await commentDao.submitReply({ userName,commentId, userId, replyId, content})
+        res.json({
+            statusCode: conf.successCode,
+            message: '回复成功',
+        })
+    } catch (error) {
+        res.json({
+            statusCode: 400,
+            message: error.toString()
+        })
+    }
+}
+
+// 获取回复列表
+exports.getReplyList = async (req, res) => {
+    try {
+        let { pageSize = 10, currentPage = 1, beginTime, endTime, content,commentId } = req.query
+        const {replyList,total} = await commentDao.getReplyList({ pageSize , currentPage , beginTime, endTime, content,commentId})
+        res.json({
+            statusCode: conf.successCode,
+            message: '回复成功',
+            data:{replyList,total}
+        })
+    } catch (error) {
+        res.json({
+            statusCode: 400,
+            message: error.toString()
+        })
+    }
+}
