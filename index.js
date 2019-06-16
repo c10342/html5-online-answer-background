@@ -121,6 +121,33 @@ app.use(session({
 // 把上传的文件保存在内存中
 app.use(FileUpload());
 
+let user_agent = [
+    'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)',
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'Sogou web spider/4.0(+http://www.sogou.com/docs/help/webmasters.htm#07)',
+    'Mozilla/5.0 (compatible; Yahoo! Slurp/3.0; http://help.yahoo.com/help/us/ysearch/slurp)',
+
+    'Baiduspider+(+http://www.baidu.com/search/spider.htm")',
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+]
+
+app.use(function(req,res,next){
+    const userAgent = req.headers['user-agent']
+    let flag = user_agent.some(item => userAgent.startsWith(item))
+    if(userAgent.startsWith('Postman') || flag){
+        const url = req.url
+        if(url == '/' || url == '/login'){
+            res.sendFile(path.join(__dirname,'./dist/login/index.html'))
+        }else if(url == '/register'){
+            res.sendFile(path.join(__dirname,'./dist/register/index.html'))
+        }else{
+            next()
+        }
+    }else{
+        next()
+    }
+})
+
 // 检查是否已经登录,以及校验token
 app.use('/api', function (req, res, next) {
     try {
@@ -137,7 +164,7 @@ app.use('/api', function (req, res, next) {
             // 校验token
             jwt.verify(token, jwtConfig.privateKey, function (err, decoded) {
                 if (err) {
-                    console.log(err)
+                    // console.log(err)
                     res.json({
                         statusCode: 401,
                         message: 'token已经过期或无效'
@@ -182,7 +209,7 @@ app.use('/share', express.static(path.join(__dirname, './share')))
 
 // 处理全局错误
 app.use(function (err, req, res, next) {
-    console.error(err.stack)
+    // console.error(err.stack)
     res.json({
         statusCode: errorCode,
         message: err.stack.toString()
